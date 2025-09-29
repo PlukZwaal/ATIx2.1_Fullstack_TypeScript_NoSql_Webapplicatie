@@ -1,9 +1,10 @@
 <script setup lang="ts">
-defineProps<{ msg: string }>()
 </script>
 
 <template>
-  <p>{{ msg }}</p>
+  <div>
+    <h1>About</h1>
+  </div>
 </template>
 
 <style scoped>
