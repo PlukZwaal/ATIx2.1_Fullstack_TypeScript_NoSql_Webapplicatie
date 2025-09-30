@@ -7,7 +7,10 @@ export class AuthService {
     private readonly JWT_SECRET: string;
 
     constructor() {
-        this.JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined in environment variables');
+        }
+        this.JWT_SECRET = process.env.JWT_SECRET;
     }
 
     async register(userData: User): Promise<AuthResponse> {

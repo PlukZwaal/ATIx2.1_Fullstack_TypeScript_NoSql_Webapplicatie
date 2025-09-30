@@ -1,4 +1,3 @@
-
 <template>
   <div class="min-h-screen flex items-center justify-center">
     <div class="bg-white p-6 rounded shadow w-full max-w-sm">
@@ -41,15 +40,37 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
+// Minimale validatie voor login
+const validateForm = () => {
+  // Email format check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    error.value = 'Voer een geldig e-mailadres in';
+    return false;
+  }
+
+  // Check of wachtwoord niet leeg is
+  if (password.value.trim().length === 0) {
+    error.value = 'Voer een wachtwoord in';
+    return false;
+  }
+
+  return true;
+};
+
 const handleSubmit = async () => {
   try {
+    error.value = '';
+    
+    if (!validateForm()) return;
+    
     await authStore.login({
       email: email.value,
       password: password.value,
     });
     router.push('/');
   } catch (err) {
-    error.value = 'Invalid email or password';
+    error.value = 'Ongeldige inloggegevens';
   }
 };
 </script>

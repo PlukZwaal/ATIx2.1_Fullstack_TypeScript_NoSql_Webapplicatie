@@ -6,6 +6,11 @@ export interface AuthRequest extends Request {
     userId?: string;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET must be defined in environment variables');
+}
+
 // Middleware voor JWT authenticatie
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -16,7 +21,8 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
         }
 
         // Verifieer token en voeg gebruikers ID toe aan request
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { id: string };
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+
         req.userId = decoded.id;
         next();
     } catch (error) {
