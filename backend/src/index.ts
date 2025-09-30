@@ -26,6 +26,13 @@ const authController = new AuthController();
 app.post('/api/auth/register', authController.register);
 app.post('/api/auth/login', authController.login);
 
+// Beveiligde routes met JWT authenticatie
+import { authMiddleware } from './infrastructure/middleware/auth';
+// Voorbeeld van een beveiligde route:
+app.get('/api/user/profile', authMiddleware, (req, res) => {
+    res.json({ message: 'Toegang tot beveiligd profiel' });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server draait op http://localhost:${PORT}`);

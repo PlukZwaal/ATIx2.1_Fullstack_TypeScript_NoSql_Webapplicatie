@@ -46,8 +46,41 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
+// Validatie regels
+const validateForm = () => {
+  // Email validatie
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    error.value = 'Voer een geldig e-mailadres in';
+    return false;
+  }
+
+  // Naam validatie
+  if (name.value.length < 2) {
+    error.value = 'Naam moet minimaal 2 karakters bevatten';
+    return false;
+  }
+
+  // Wachtwoord validatie
+  if (password.value.length < 8) {
+    error.value = 'Wachtwoord moet minimaal 8 karakters bevatten';
+    return false;
+  }
+
+  // Wachtwoord sterkte
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+  if (!passwordRegex.test(password.value)) {
+    error.value = 'Wachtwoord moet minimaal één hoofdletter, één kleine letter en één cijfer bevatten';
+    return false;
+  }
+
+  return true;
+};
+
 const handleSubmit = async () => {
   try {
+    if (!validateForm()) return;
+    
     await authStore.register({
       name: name.value,
       email: email.value,
@@ -55,7 +88,7 @@ const handleSubmit = async () => {
     });
     router.push('/');
   } catch (err) {
-    error.value = 'Registration failed. Please try again.';
+    error.value = 'Registratie mislukt. Probeer het opnieuw.';
   }
 };
 </script>

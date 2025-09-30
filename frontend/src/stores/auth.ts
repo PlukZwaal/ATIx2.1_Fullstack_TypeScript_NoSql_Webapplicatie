@@ -1,8 +1,23 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
+
 // API configuratie
-const API_URL = 'http://localhost:4000/api/auth';
+const API_URL = import.meta.env.API_URL;
+
+// Axios instantie met auth header
+const api = axios.create({
+    baseURL: API_URL
+});
+
+// Voeg auth token toe aan requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 // Types voor gebruiker en authenticatie
 interface User {
