@@ -1,12 +1,32 @@
-import express, { Application, Request, Response } from 'express'
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { AuthController } from './infrastructure/controllers/AuthController';
 
-const app: Application = express()
-const PORT = process.env.PORT || 4000
+// Laad environment variables
+dotenv.config();
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Backend is running!')
-})
+const app = express();
+const PORT = process.env.PORT || 4000;
 
+// Middleware voor CORS en JSON parsing
+app.use(cors());
+app.use(express.json());
+
+// MongoDB verbinding
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-system')
+    .then(() => console.log('Verbonden met MongoDB'))
+    .catch((error) => console.error('MongoDB verbindingsfout:', error));
+
+// Initialiseer controller
+const authController = new AuthController();
+
+// Auth routes
+app.post('/api/auth/register', authController.register);
+app.post('/api/auth/login', authController.login);
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`)
-})
+    console.log(`Server draait op http://localhost:${PORT}`);
+});

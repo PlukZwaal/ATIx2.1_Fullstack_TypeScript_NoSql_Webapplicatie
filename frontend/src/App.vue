@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import Navbar from './components/Navbar.vue';
+import { useAuthStore } from './stores/auth';
+
+const authStore = useAuthStore();
 </script>
 
 <template>
-  <nav>
-    <router-link to="/">Home</router-link>
-    <router-link to="/about">About</router-link>
-    <router-link to="/test">Test</router-link>
-  </nav>
-  <router-view />
+  <div class="min-h-screen bg-gray-50">
+    <Navbar v-if="authStore.isAuthenticated" />
+    <main class="p-4">
+      <router-view />
+    </main>
+  </div>
 </template>
-
-<style scoped>
-</style>
