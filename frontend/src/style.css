@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Full height layout baseline */
+html, body, #app {
+	height: 100%;
+}
+
+/* Verberg verticale scrollbar op auth pagina's wanneer niet ingelogd (basis scenario) */
+body.auth-locked {
+	overflow: hidden;
+}

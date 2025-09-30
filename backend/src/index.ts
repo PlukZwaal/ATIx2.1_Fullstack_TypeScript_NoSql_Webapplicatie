@@ -1,39 +1,46 @@
+/**
+ * Entry point backend.
+ * Gaat er vanuit dat benodigde environment variabelen correct aanwezig zijn.
+ */
+import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import dotenv from 'dotenv';
+// Controllers & middleware
 import { AuthController } from './infrastructure/controllers/AuthController';
-
-// Laad environment variables
-dotenv.config();
-
+import { authMiddleware } from './infrastructure/middleware/auth';
+// Express applicatie
 const app = express();
-const PORT = process.env.PORT || 4000;
+if (!process.env.PORT) throw new Error('PORT ontbreekt in .env');
+if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI ontbreekt in .env');
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET ontbreekt in .env');
+const PORT = process.env.PORT;
 
-// Middleware voor CORS en JSON parsing
+// Basis middleware (CORS + JSON body parsing)
 app.use(cors());
 app.use(express.json());
 
-// MongoDB verbinding
-mongoose.connect(process.env.DB_CONNECTION || '' )
-    .then(() => console.log('Verbonden met MongoDB'))
-    .catch((error) => console.error('MongoDB verbindingsfout:', error));
+// Verbind direct met MongoDB (verwacht dat MONGODB_URI gezet is)
+mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB verbonden'))
+    .catch(err => console.error('MongoDB fout:', err));
 
-// Initialiseer controller
+// Initialiseer controllers
 const authController = new AuthController();
 
-// Auth routes
-app.post('/api/auth/register', authController.register);
-app.post('/api/auth/login', authController.login);
+// Publieke authenticatie routes
+app.post('/api/auth/register', authController.register); 
+app.post('/api/auth/login', authController.login);      
 
-// Beveiligde routes met JWT authenticatie
-import { authMiddleware } from './infrastructure/middleware/auth';
-// Voorbeeld van een beveiligde route:
-app.get('/api/user/profile', authMiddleware, (req, res) => {
-    res.json({ message: 'Toegang tot beveiligd profiel' });
-});
+// Voorbeeld van een beveiligde route
+app.get('/api/user/profile', authMiddleware, (_req, res) => res.json({ message: 'Toegang tot beveiligd profiel' }));
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server draait op http://localhost:${PORT}`);
-});
+// Huidige gebruiker opvragen (alleen ID uit token)
+app.get('/api/auth/me', authMiddleware, (req: any, res) => res.json({ id: req.userId }));
+
+// Start HTTP server
+app.listen(PORT, () => console.log(`Server draait op http://localhost:${PORT}`));

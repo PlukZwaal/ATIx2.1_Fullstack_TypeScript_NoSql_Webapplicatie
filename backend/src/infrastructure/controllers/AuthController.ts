@@ -1,13 +1,11 @@
+// AuthController: vertaalt HTTP requests naar service calls. Gaat uit van gevulde env variabelen.
 import { Request, Response } from 'express';
 import { AuthService } from '../../application/services/AuthService';
 import { User, UserLogin } from '../../core/entities/User';
 
 export class AuthController {
     private authService: AuthService;
-
-    constructor() {
-        this.authService = new AuthService();
-    }
+    constructor() { this.authService = new AuthService(); }
 
     register = async (req: Request, res: Response) => {
         try {
@@ -15,7 +13,7 @@ export class AuthController {
             const result = await this.authService.register(userData);
             res.status(201).json(result);
         } catch (error) {
-            res.status(400).json({ message: error instanceof Error ? error.message : 'Registration failed' });
+            res.status(400).json({ message: error instanceof Error ? error.message : 'Registratie mislukt' });
         }
     };
 
@@ -25,7 +23,7 @@ export class AuthController {
             const result = await this.authService.login(credentials);
             res.status(200).json(result);
         } catch (error) {
-            res.status(401).json({ message: error instanceof Error ? error.message : 'Login failed' });
+            res.status(401).json({ message: error instanceof Error ? error.message : 'Login mislukt' });
         }
     };
 }

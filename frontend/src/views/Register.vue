@@ -18,6 +18,15 @@
           <input type="password" v-model="password" required class="w-full border p-2 rounded" />
         </div>
 
+        <!-- Dynamische wachtwoord eisen -->
+        <ul class="text-sm mt-2 space-y-1">
+          <li :class="passwordCriteria.length ? 'text-green-600' : 'text-gray-500'">Minimaal 8 karakters</li>
+          <li :class="passwordCriteria.lower ? 'text-green-600' : 'text-gray-500'">Bevat een kleine letter (a-z)</li>
+          <li :class="passwordCriteria.upper ? 'text-green-600' : 'text-gray-500'">Bevat een hoofdletter (A-Z)</li>
+          <li :class="passwordCriteria.digit ? 'text-green-600' : 'text-gray-500'">Bevat een cijfer (0-9)</li>
+          <li :class="passwordCriteria.special ? 'text-green-600' : 'text-gray-500'">Bevat een speciaal teken (! @ # ? *)</li>
+        </ul>
+
         <div>
           <button type="submit" class="w-full bg-gray-900 text-white p-2 rounded">Registreren</button>
         </div>
@@ -34,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 
@@ -46,34 +55,30 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
-// Validatie regels
+// Computed: status van individuele criteria voor live feedback
+const passwordCriteria = computed(() => ({
+  length: password.value.length >= 8,
+  lower: /[a-z]/.test(password.value),
+  upper: /[A-Z]/.test(password.value),
+  digit: /\d/.test(password.value),
+  special: /[^A-Za-z0-9]/.test(password.value),
+}));
+
+// Validatie regels (blokkeert submit als niet compleet)
 const validateForm = () => {
-  // Email validatie
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.value)) {
     error.value = 'Voer een geldig e-mailadres in';
     return false;
   }
-
-  // Naam validatie
-  if (name.value.length < 2) {
+  if (name.value.trim().length < 2) {
     error.value = 'Naam moet minimaal 2 karakters bevatten';
     return false;
   }
-
-  // Wachtwoord validatie
-  if (password.value.length < 8) {
-    error.value = 'Wachtwoord moet minimaal 8 karakters bevatten';
+  if (!passwordCriteria.value.length || !passwordCriteria.value.lower || !passwordCriteria.value.upper || !passwordCriteria.value.digit || !passwordCriteria.value.special) {
+    error.value = 'Wachtwoord voldoet nog niet aan alle eisen (hoofdletter, kleine letter, cijfer, speciaal teken)';
     return false;
   }
-
-  // Wachtwoord sterkte
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-  if (!passwordRegex.test(password.value)) {
-    error.value = 'Wachtwoord moet minimaal één hoofdletter, één kleine letter en één cijfer bevatten';
-    return false;
-  }
-
   return true;
 };
 
@@ -87,8 +92,10 @@ const handleSubmit = async () => {
       password: password.value,
     });
     router.push('/');
-  } catch (err) {
-    error.value = 'Registratie mislukt. Probeer het opnieuw.';
+  } catch (err: any) {
+    // Toon backend foutmelding indien beschikbaar (bv. e-mailadres al in gebruik)
+    const backendMsg = err?.response?.data?.message;
+    error.value = backendMsg || 'Registratie mislukt. Probeer het opnieuw.';
   }
 };
 </script>
