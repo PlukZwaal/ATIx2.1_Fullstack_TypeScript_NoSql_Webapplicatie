@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB verbinding
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-system')
+mongoose.connect(process.env.DB_CONNECTION || '' )
     .then(() => console.log('Verbonden met MongoDB'))
     .catch((error) => console.error('MongoDB verbindingsfout:', error));
 
