@@ -11,6 +11,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 // Controllers & middleware
 import { AuthController } from './infrastructure/controllers/AuthController';
+import { ModuleController } from './infrastructure/controllers/ModuleController';
 import { authMiddleware } from './infrastructure/middleware/auth';
 // Express applicatie
 const app = express();
@@ -31,6 +32,7 @@ mongoose
 
 // Initialiseer controllers
 const authController = new AuthController();
+const moduleController = new ModuleController();
 
 // Publieke authenticatie routes
 app.post('/api/auth/register', authController.register); 
@@ -41,6 +43,10 @@ app.get('/api/user/profile', authMiddleware, (_req, res) => res.json({ message: 
 
 // Huidige gebruiker opvragen (alleen ID uit token)
 app.get('/api/auth/me', authMiddleware, (req: any, res) => res.json({ id: req.userId }));
+
+// Module routes
+app.post('/api/modules', moduleController.create);
+app.get('/api/modules', moduleController.getAll);
 
 // Start HTTP server
 app.listen(PORT, () => console.log(`Server draait op http://localhost:${PORT}`));
