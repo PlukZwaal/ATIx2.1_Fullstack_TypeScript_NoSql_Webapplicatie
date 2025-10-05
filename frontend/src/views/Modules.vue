@@ -3,7 +3,7 @@
 
 <template>
   <div>
-    <h1>About</h1>
+    <h1>Modules</h1>
   </div>
 </template>
 
