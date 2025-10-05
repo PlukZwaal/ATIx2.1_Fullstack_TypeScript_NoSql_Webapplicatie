@@ -9,6 +9,29 @@ export const isValidEmail = (email: string): boolean => {
 // Normaliseer e-mail (trim + lowercase) voor consistente opslag / matching
 export const normalizeEmail = (email: string): string => email.trim().toLowerCase();
 
+// Normaliseer naam: trim, lowercase en eerste letter van elk woord hoofdletter voor presentatie-consistentie
+export const normalizeName = (name: string): string => {
+  const trimmed = name.trim().toLowerCase();
+  if (!trimmed) return trimmed;
+  return trimmed
+    .split(/\s+/)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+};
+
+// Verzamelde normalisatie voor registratie
+export const normalizeRegisterInput = (data: { name: string; email: string; password: string }) => ({
+  name: normalizeName(data.name),
+  email: normalizeEmail(data.email),
+  password: data.password,
+});
+
+// Verzamelde normalisatie voor login
+export const normalizeLoginInput = (data: { email: string; password: string }) => ({
+  email: normalizeEmail(data.email),
+  password: data.password,
+});
+
 // Minimaal 8 chars, 1 hoofdletter, 1 kleine letter, 1 cijfer, 1 speciaal teken
 export const isStrongPassword = (password: string): boolean => {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);

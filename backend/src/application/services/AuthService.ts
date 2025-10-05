@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserLogin, AuthResponse } from '../../core/entities/User';
 import { UserModel } from '../../infrastructure/models/UserModel';
-import { validateRegisterInput, validateLoginInput, normalizeEmail } from '../utils/validation';
+import { validateRegisterInput, validateLoginInput, normalizeRegisterInput, normalizeLoginInput } from '../utils/validation';
 
 export class AuthService {
     constructor() {
@@ -10,7 +10,8 @@ export class AuthService {
     }
 
     async register(userData: User): Promise<AuthResponse> {
-        userData.email = normalizeEmail(userData.email);
+        // Centraliseer normalisatie via utils (naam + email)
+        userData = normalizeRegisterInput(userData as any) as User;
         const regValidation = validateRegisterInput(userData.name, userData.email, userData.password);
         if (!regValidation.valid) {
             throw new Error(regValidation.message);
@@ -38,7 +39,7 @@ export class AuthService {
     }
 
     async login(credentials: UserLogin): Promise<AuthResponse> {
-        credentials.email = normalizeEmail(credentials.email);
+    credentials = normalizeLoginInput(credentials as any) as UserLogin;
         const loginValidation = validateLoginInput(credentials.email, credentials.password);
         if (!loginValidation.valid) {
             throw new Error(loginValidation.message);
