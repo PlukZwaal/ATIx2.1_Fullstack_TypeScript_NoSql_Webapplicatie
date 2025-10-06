@@ -82,10 +82,6 @@ onMounted(() => {
 
           <!-- Module header -->
           <div class="bg-gradient-to-r from-red-400 to-rose-500 rounded-2xl p-8 text-white relative overflow-hidden">
-            <!-- Background decoration -->
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
-            
             <div class="relative z-10">
               <h1 class="text-4xl font-bold mb-4">{{ module.name }}</h1>
               <p class="text-blue-100 text-lg mb-6 max-w-3xl">{{ module.shortdescription }}</p>
