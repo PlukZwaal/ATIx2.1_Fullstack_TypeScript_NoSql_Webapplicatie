@@ -1,12 +1,16 @@
-// AuthController: vertaalt HTTP requests naar service calls. Gaat uit van gevulde env variabelen.
+// AuthController krijgt HTTP requests van frontend en geeft ze door aan AuthService
 import { Request, Response } from 'express';
 import { AuthService } from '../../application/services/AuthService';
 import { User, UserLogin } from '../../core/entities/User';
 
 export class AuthController {
     private authService: AuthService;
-    constructor() { this.authService = new AuthService(); }
+    
+    constructor() { 
+        this.authService = new AuthService(); 
+    }
 
+    // Registratie: pak user data uit request, laat service het werk doen, stuur result of error terug
     register = async (req: Request, res: Response) => {
         try {
             const userData: User = req.body;
@@ -17,6 +21,7 @@ export class AuthController {
         }
     };
 
+    // Login: pak credentials uit request, laat service valideren, stuur token of error terug
     login = async (req: Request, res: Response) => {
         try {
             const credentials: UserLogin = req.body;

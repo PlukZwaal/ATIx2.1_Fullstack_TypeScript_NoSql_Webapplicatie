@@ -1,92 +1,167 @@
 <template>
-  <div class="min-h-screen py-8 px-4">
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 class="text-2xl mb-6">Nieuwe Module Aanmaken</h2>
-      <form @submit.prevent="handleSubmit" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+    <div class="container mx-auto px-6 max-w-4xl">
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-3xl font-semibold text-gray-800">Nieuwe Module</h1>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-white border border-gray-200 rounded p-6">
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <!-- Basis informatie -->
           <div>
-            <label class="block mb-1 font-medium">Naam *</label>
-            <input type="text" v-model="formData.name" required class="w-full border p-2 rounded" />
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Basis Informatie</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Naam *</label>
+                <input 
+                  type="text" 
+                  v-model="formData.name" 
+                  required 
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Naam van de module"
+                />
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Locatie *</label>
+                <input 
+                  type="text" 
+                  v-model="formData.location" 
+                  required 
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Waar wordt de module gegeven?"
+                />
+              </div>
+            </div>
           </div>
 
+          <!-- Beschrijving -->
           <div>
-            <label class="block mb-1 font-medium">Locatie *</label>
-            <input type="text" v-model="formData.location" required class="w-full border p-2 rounded" />
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Beschrijving</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Korte Beschrijving *</label>
+                <input 
+                  type="text" 
+                  v-model="formData.shortdescription" 
+                  required 
+                  maxlength="150"
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Korte samenvatting van de module"
+                />
+                <small class="text-gray-500 mt-1 block">Max 150 karakters</small>
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Uitgebreide Beschrijving *</label>
+                <textarea 
+                  v-model="formData.description" 
+                  required 
+                  rows="3"
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Gedetailleerde beschrijving van de module"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Module Inhoud *</label>
+                <textarea 
+                  v-model="formData.content" 
+                  required 
+                  rows="4"
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Wat wordt er behandeld in deze module?"
+                ></textarea>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label class="block mb-1 font-medium">Korte Beschrijving *</label>
-          <input type="text" v-model="formData.shortdescription" required class="w-full border p-2 rounded" maxlength="150" />
-          <small class="text-gray-500">Max 150 karakters</small>
-        </div>
-
-        <div>
-          <label class="block mb-1 font-medium">Beschrijving *</label>
-          <textarea v-model="formData.description" required class="w-full border p-2 rounded h-24 resize-none"></textarea>
-        </div>
-
-        <div>
-          <label class="block mb-1 font-medium">Inhoud *</label>
-          <textarea v-model="formData.content" required class="w-full border p-2 rounded h-32 resize-none"></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Details -->
           <div>
-            <label class="block mb-1 font-medium">Studiecredits *</label>
-            <input type="number" v-model.number="formData.studycredit" required min="0" class="w-full border p-2 rounded" />
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Module Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Studiecredits *</label>
+                <input 
+                  type="number" 
+                  v-model.number="formData.studycredit" 
+                  required 
+                  min="0"
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Aantal credits"
+                />
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Niveau *</label>
+                <input 
+                  type="text" 
+                  v-model="formData.level" 
+                  required 
+                  class="w-full border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  placeholder="Bijv. Beginnend, Gevorderd, Expert"
+                />
+              </div>
+            </div>
           </div>
 
+          <!-- Leeruitkomsten -->
           <div>
-            <label class="block mb-1 font-medium">Niveau *</label>
-            <input type="text" v-model="formData.level" required class="w-full border p-2 rounded" placeholder="Bijv. Beginnend, Gevorderd, Expert" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block mb-1 font-medium">Leeruitkomsten *</label>
-          <div class="space-y-2">
-            <div v-for="(outcome, index) in formData.learningoutcomes" :key="index" class="flex gap-2">
-              <input 
-                type="text" 
-                v-model="formData.learningoutcomes[index]" 
-                class="flex-1 border p-2 rounded" 
-                :placeholder="`Leeruitkomst ${index + 1}`"
-              />
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Leeruitkomsten</h3>
+            <div class="space-y-2">
+              <div v-for="(_, index) in formData.learningoutcomes" :key="index" class="flex gap-2 items-center">
+                <input 
+                  type="text" 
+                  v-model="formData.learningoutcomes[index]" 
+                  class="flex-1 border border-gray-300 focus:border-gray-600 p-2 rounded"
+                  :placeholder="`Leeruitkomst ${index + 1}`"
+                />
+                <button 
+                  type="button" 
+                  @click="removeLearningOutcome(index)" 
+                  v-if="formData.learningoutcomes.length > 1"
+                  class="px-2 py-2 text-red-600 hover:text-red-700"
+                >
+                  ×
+                </button>
+              </div>
               <button 
                 type="button" 
-                @click="removeLearningOutcome(index)"
-                v-if="formData.learningoutcomes.length > 1"
-                class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+                @click="addLearningOutcome"
+                class="w-full py-2 border border-dashed border-gray-300 text-gray-600 rounded hover:border-gray-400"
               >
-                ×
+                + Leeruitkomst toevoegen
               </button>
             </div>
-            <button 
-              type="button" 
-              @click="addLearningOutcome"
-              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              + Leeruitkomst toevoegen
-            </button>
           </div>
-        </div>
 
-        <div class="flex gap-4">
-          <button type="submit" class="bg-gray-900 text-white px-6 py-2 rounded hover:bg-gray-800">
-            Module Aanmaken
-          </button>
-          <router-link 
-            to="/modules" 
-            class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400 text-center"
-          >
-            Annuleren
-          </router-link>
-        </div>
+          <!-- Submit knoppen -->
+          <div class="flex gap-3 pt-4">
+            <button 
+              type="submit" 
+              :disabled="isSubmitting"
+              class="flex-1 bg-gray-900 text-white py-2 px-4 rounded font-medium hover:bg-black disabled:bg-gray-400 transition-colors"
+            >
+              <span v-if="isSubmitting">Bezig met opslaan...</span>
+              <span v-else>Module Aanmaken</span>
+            </button>
+            <router-link 
+              to="/modules" 
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded font-medium hover:bg-gray-50 transition-colors"
+            >
+              Annuleren
+            </router-link>
+          </div>
         
-        <p v-if="error" class="text-red-500">{{ error }}</p>
-        <p v-if="success" class="text-green-500">{{ success }}</p>
-      </form>
+          <!-- Feedback berichten -->
+          <div v-if="error || success" class="mt-4">
+            <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded">
+              {{ error }}
+            </div>
+            <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded">
+              {{ success }}
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -99,6 +174,7 @@ import axios from 'axios';
 const router = useRouter();
 const error = ref('');
 const success = ref('');
+const isSubmitting = ref(false);
 
 const formData = reactive({
   name: '',
@@ -137,7 +213,10 @@ const validateForm = (): string | null => {
 };
 
 const handleSubmit = async () => {
+  if (isSubmitting.value) return;
+  
   try {
+    isSubmitting.value = true;
     error.value = '';
     success.value = '';
     
@@ -155,10 +234,17 @@ const handleSubmit = async () => {
     
     await axios.post('/api/modules', cleanedData);
     
-    // Doorsturen naar modules pagina met succesmelding
-    router.push('/modules?created=true');
+    success.value = 'Module succesvol aangemaakt!';
+    
+    // Wacht 1 seconde voor feedback en ga dan naar modules pagina
+    setTimeout(() => {
+      router.push('/modules?created=true');
+    }, 1000);
+    
   } catch (err: any) {
     error.value = err?.response?.data?.message || 'Module aanmaken mislukt. Probeer het opnieuw.';
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>

@@ -1,3 +1,4 @@
+// AuthService doet alle echte werk voor inloggen en registreren - wachtwoorden hashen, tokens maken, validaties checken
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserLogin, AuthResponse } from '../../core/entities/User';
@@ -9,13 +10,14 @@ export class AuthService {
         if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET ontbreekt in .env');
     }
 
+    // Nieuwe gebruiker registreren: valideer input, check of email al bestaat, hash wachtwoord en maak token
     async register(userData: User): Promise<AuthResponse> {
-        // Centraliseer normalisatie via utils (naam + email)
         userData = normalizeRegisterInput(userData as any) as User;
         const regValidation = validateRegisterInput(userData.name, userData.email, userData.password);
         if (!regValidation.valid) {
             throw new Error(regValidation.message);
         }
+        
         const existingUser = await UserModel.findOne({ email: userData.email });
         if (existingUser) {
             throw new Error('E-mailadres is al geregistreerd');
@@ -38,12 +40,14 @@ export class AuthService {
         };
     }
 
+    // Gebruiker inloggen: valideer input, zoek gebruiker, vergelijk wachtwoord en geef token terug
     async login(credentials: UserLogin): Promise<AuthResponse> {
-    credentials = normalizeLoginInput(credentials as any) as UserLogin;
+        credentials = normalizeLoginInput(credentials as any) as UserLogin;
         const loginValidation = validateLoginInput(credentials.email, credentials.password);
         if (!loginValidation.valid) {
             throw new Error(loginValidation.message);
         }
+        
         const user = await UserModel.findOne({ email: credentials.email });
         if (!user) {
             throw new Error('Ongeldige inloggegevens');
@@ -65,6 +69,7 @@ export class AuthService {
         };
     }
 
+    // JWT token maken met gebruiker ID, geldig voor 24 uur
     private generateToken(user: User): string {
         return jwt.sign({ sub: user.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
     }

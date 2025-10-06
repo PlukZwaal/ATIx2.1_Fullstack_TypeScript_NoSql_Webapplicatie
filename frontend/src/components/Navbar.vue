@@ -1,50 +1,84 @@
 <template>
-  <nav class="bg-gray-900 text-white px-4 sm:px-6 py-3 shadow">
-    <div class="flex justify-between items-center">
-      <!-- Desktop: logo + (desktop) links -->
-      <div class="flex items-center gap-6">
-        <router-link to="/" class="font-bold tracking-wide text-sm sm:text-base">LU1_NoSQL_Typescript</router-link>
-        <!-- Desktop navigatie links (alleen ingelogd) -->
-        <div v-if="authStore.isAuthenticated" class="hidden md:flex gap-5 text-sm">
-          <router-link to="/modules" class="hover:underline">Modules</router-link>
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo + links -->
+        <div class="flex items-center gap-8">
+          <router-link to="/" class="font-bold text-lg text-gray-900 hover:text-gray-700 transition-colors">
+            Avans Modules
+          </router-link>
+          
+          <!-- Navigation links -->
+          <div v-if="authStore.isAuthenticated" class="hidden md:flex items-center gap-4">
+            <router-link 
+              to="/modules" 
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Modules
+            </router-link>
+            <router-link 
+              to="/modules/create" 
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Nieuwe Module
+            </router-link>
+          </div>
         </div>
+
+        <!-- User info + logout -->
+        <div v-if="authStore.isAuthenticated" class="hidden md:flex items-center gap-4">
+          <span class="text-gray-600">{{ authStore.user?.name }}</span>
+          <button 
+            @click="handleLogout" 
+            class="text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            Uitloggen
+          </button>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button
+          v-if="authStore.isAuthenticated"
+          @click="menuOpen = !menuOpen"
+          class="md:hidden text-gray-600 hover:text-gray-900 transition-colors"
+          aria-label="Menu"
+        >
+          <span v-if="!menuOpen">☰</span>
+          <span v-else>✕</span>
+        </button>
       </div>
 
-      <!-- Desktop: user info + logout -->
-      <div v-if="authStore.isAuthenticated" class="hidden md:flex gap-4 items-center">
-        <span class="text-sm">{{ authStore.user?.name }}</span>
-        <button @click="handleLogout" class="bg-white/10 hover:bg-white/20 transition px-3 py-1 rounded text-sm">Uitloggen</button>
-      </div>
-
-      <!-- Mobile: hamburger knop (zichtbaar onder md) -->
-      <button
-        v-if="authStore.isAuthenticated"
-        @click="menuOpen = !menuOpen"
-        class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40"
-        aria-label="Menu"
-  :aria-expanded="menuOpen"
+      <!-- Mobile menu -->
+      <div
+        v-if="authStore.isAuthenticated && menuOpen"
+        class="md:hidden border-t border-gray-200 py-4 space-y-2"
       >
-        <span v-if="!menuOpen" class="flex flex-col gap-[5px]">
-          <span class="block w-5 h-0.5 bg-white"></span>
-          <span class="block w-5 h-0.5 bg-white"></span>
-          <span class="block w-5 h-0.5 bg-white"></span>
-        </span>
-        <span v-else class="block w-5 h-5 relative">
-          <span class="absolute left-0 top-1/2 -translate-y-1/2 block w-5 h-0.5 bg-white rotate-45"></span>
-          <span class="absolute left-0 top-1/2 -translate-y-1/2 block w-5 h-0.5 bg-white -rotate-45"></span>
-        </span>
-      </button>
-    </div>
-
-    <!-- Mobile: uitklapmenu met navigatie + user info -->
-    <div
-      v-if="authStore.isAuthenticated && menuOpen"
-      class="md:hidden mt-3 border-t border-white/10 pt-3 flex flex-col gap-3 text-sm"
-    >
-      <router-link @click="closeMenu" to="/modules" class="hover:underline">Modules</router-link>
-      <div class="flex items-center justify-between">
-        <span class="text-xs text-white/80">{{ authStore.user?.name }}</span>
-        <button @click="handleLogoutAndClose" class="bg-white/10 hover:bg-white/20 transition px-3 py-1 rounded text-xs">Uitloggen</button>
+        <router-link 
+          @click="closeMenu" 
+          to="/modules" 
+          class="block px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          Modules
+        </router-link>
+        <router-link 
+          @click="closeMenu" 
+          to="/modules/create" 
+          class="block px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          Nieuwe Module
+        </router-link>
+        
+        <div class="border-t border-gray-200 pt-4 mt-4">
+          <div class="flex items-center justify-between px-4 py-2">
+            <span class="text-gray-600">{{ authStore.user?.name }}</span>
+            <button 
+              @click="handleLogoutAndClose" 
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Uitloggen
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
