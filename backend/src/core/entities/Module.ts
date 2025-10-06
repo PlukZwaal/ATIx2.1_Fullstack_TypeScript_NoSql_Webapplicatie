@@ -8,5 +8,5 @@ export interface Module {
     studycredit: number;
     location: string;
     level: string;
-    learningoutcomes: string[];
+    learningoutcomes: string;
 }

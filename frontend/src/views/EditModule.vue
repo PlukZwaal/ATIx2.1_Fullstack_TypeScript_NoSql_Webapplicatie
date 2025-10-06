@@ -18,7 +18,7 @@ const formData = reactive({
   studycredit: 0,
   location: '',
   level: '',
-  learningoutcomes: ['']
+  learningoutcomes: ''
 });
 
 const loadModule = async () => {
@@ -35,7 +35,7 @@ const loadModule = async () => {
     formData.studycredit = module.studycredit;
     formData.location = module.location;
     formData.level = module.level;
-    formData.learningoutcomes = [...module.learningoutcomes];
+    formData.learningoutcomes = module.learningoutcomes;
   } catch (err: any) {
     error.value = err?.response?.data?.message || 'Fout bij laden module';
     console.error(err);
@@ -44,15 +44,7 @@ const loadModule = async () => {
   }
 };
 
-const addLearningOutcome = () => {
-  formData.learningoutcomes.push('');
-};
-
-const removeLearningOutcome = (index: number) => {
-  if (formData.learningoutcomes.length > 1) {
-    formData.learningoutcomes.splice(index, 1);
-  }
-};
+// Deze functies zijn niet meer nodig omdat we nu een string gebruiken
 
 const validateForm = (): string | null => {
   if (!formData.name.trim()) return 'Naam is verplicht';
@@ -62,9 +54,7 @@ const validateForm = (): string | null => {
   if (!formData.location.trim()) return 'Locatie is verplicht';
   if (!formData.level) return 'Niveau is verplicht';
   if (formData.studycredit < 0) return 'Studiecredits moeten 0 of hoger zijn';
-  
-  const validOutcomes = formData.learningoutcomes.filter(outcome => outcome.trim());
-  if (validOutcomes.length === 0) return 'Er moet minimaal één leeruitkomst worden opgegeven';
+  if (!formData.learningoutcomes.trim()) return 'Leeruitkomsten zijn verplicht';
   
   return null;
 };
@@ -83,10 +73,9 @@ const handleSubmit = async () => {
       return;
     }
     
-    // Filter lege leeruitkomsten
+    // Gebruik de formData direct, geen filtering nodig voor string
     const cleanedData = {
-      ...formData,
-      learningoutcomes: formData.learningoutcomes.filter(outcome => outcome.trim())
+      ...formData
     };
     
     await axios.put(`/api/modules/${route.params.id}`, cleanedData);
@@ -111,21 +100,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4">
-    <div class="container mx-auto px-6 max-w-4xl">
+  <div class="min-h-screen py-8 px-6">
+    <div class="container mx-auto max-w-4xl">
       <!-- Loading state -->
-      <div v-if="loading" class="text-center py-8">
-        <p class="text-gray-600">Module wordt geladen...</p>
+      <div v-if="loading" class="text-center py-16">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-6 animate-pulse">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </div>
+        <p class="text-slate-600 text-xl">Module wordt geladen...</p>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error && !formData.name" class="text-center py-8">
-        <div class="bg-red-50 border border-red-200 rounded p-4 inline-block">
-          <h2 class="text-red-800 font-semibold mb-2">Er is iets misgegaan</h2>
-          <p class="text-red-600 mb-4">{{ error }}</p>
+      <div v-else-if="error && !formData.name" class="text-center py-16">
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-12 inline-block">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-red-700 mb-4">Er is iets misgegaan</h3>
+          <p class="text-red-600 mb-6">{{ error }}</p>
           <router-link 
             to="/modules" 
-            class="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 transition-colors"
+            class="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 hover:scale-105"
           >
             Terug naar modules
           </router-link>
@@ -135,98 +134,186 @@ onMounted(() => {
       <!-- Form content -->
       <div v-else>
         <!-- Header -->
-        <div class="border-b border-gray-200 pb-4 mb-6">
-          <h1 class="text-3xl font-bold text-gray-900">Module Bewerken</h1>
-          <p class="text-gray-600 mt-2">Pas de module informatie aan</p>
+        <div class="mb-8">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-rose-500 rounded-xl flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-4xl font-bold text-slate-800">Module Bewerken</h1>
+              <p class="text-slate-600">Pas de module informatie aan</p>
+            </div>
+          </div>
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <!-- Basis informatie sectie -->
-          <div class="bg-white border border-gray-200 rounded p-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Basis Informatie</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Naam *</label>
-                <input type="text" v-model="formData.name" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" placeholder="Naam van de module" />
-              </div>
-
-              <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Locatie *</label>
-                <input type="text" v-model="formData.location" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" placeholder="Waar wordt de module gegeven?" />
-              </div>
-
-              <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Studiecredits *</label>
-                <input type="number" v-model.number="formData.studycredit" required min="0" class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" placeholder="Aantal credits" />
-              </div>
-
-              <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Niveau *</label>
-                <input type="text" v-model="formData.level" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" placeholder="Bijv. Beginnend, Gevorderd, Expert" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block mb-2 text-sm font-medium text-gray-700">Korte Beschrijving *</label>
-                <input type="text" v-model="formData.shortdescription" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" maxlength="150" placeholder="Korte samenvatting van de module" />
-                <small class="text-gray-500 mt-1 block">Max 150 karakters</small>
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block mb-2 text-sm font-medium text-gray-700">Uitgebreide Beschrijving *</label>
-                <textarea v-model="formData.description" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded h-24 resize-none" placeholder="Gedetailleerde beschrijving van de module"></textarea>
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block mb-2 text-sm font-medium text-gray-700">Module Inhoud *</label>
-                <textarea v-model="formData.content" required class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded h-32 resize-none" placeholder="Wat wordt er behandeld in deze module?"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <!-- Leeruitkomsten sectie -->
-          <div class="bg-white border border-gray-200 rounded p-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Leeruitkomsten</h3>
-
-            <div class="space-y-3">
-              <div v-for="(_, index) in formData.learningoutcomes" :key="index" class="flex gap-3 items-center">
-                <div class="flex-1">
-                  <input type="text" v-model="formData.learningoutcomes[index]" class="w-full border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-2 rounded" :placeholder="`Leeruitkomst ${index + 1}`" />
+        <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-xl">
+          <form @submit.prevent="handleSubmit" class="space-y-8">
+            <!-- Basis informatie sectie -->
+            <div class="space-y-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <button type="button" @click="removeLearningOutcome(index)" v-if="formData.learningoutcomes.length > 1" class="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition-colors flex-shrink-0">
-                  ×
-                </button>
+                <h3 class="text-2xl font-bold text-slate-800">Basis Informatie</h3>
               </div>
-              <button type="button" @click="addLearningOutcome" class="w-full py-2 border border-dashed border-gray-300 text-gray-600 rounded hover:border-blue-500 hover:text-blue-600 transition-colors">
-                + Leeruitkomst toevoegen
-              </button>
-            </div>
-          </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Naam *</label>
+                  <input 
+                    type="text" 
+                    v-model="formData.name" 
+                    required 
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
+                    placeholder="Naam van de module"
+                  />
+                </div>
 
-          <!-- Submit knoppen -->
-          <div class="flex gap-4 justify-center pt-6">
-            <button type="submit" :disabled="isSubmitting" class="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors">
-              <span v-if="isSubmitting">Bezig met bijwerken...</span>
-              <span v-else>Module Bijwerken</span>
-            </button>
-            <router-link 
-              :to="`/modules/${route.params.id}`"
-              class="bg-gray-100 text-gray-700 px-6 py-2 rounded font-medium hover:bg-gray-200 transition-colors"
-            >
-              Annuleren
-            </router-link>
-          </div>
-        
-          <!-- Feedback berichten -->
-          <div v-if="error || success" class="mt-6">
-            <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {{ error }}
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Locatie *</label>
+                  <input 
+                    type="text" 
+                    v-model="formData.location" 
+                    required 
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
+                    placeholder="Waar wordt de module gegeven?"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Studiecredits *</label>
+                  <input 
+                    type="number" 
+                    v-model.number="formData.studycredit" 
+                    required 
+                    min="0"
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
+                    placeholder="Aantal credits"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Niveau *</label>
+                  <input 
+                    type="text" 
+                    v-model="formData.level" 
+                    required 
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
+                    placeholder="Bijv. Beginnend, Gevorderd, Expert"
+                  />
+                </div>
+
+                <div class="md:col-span-2 space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Korte Beschrijving *</label>
+                  <input 
+                    type="text" 
+                    v-model="formData.shortdescription" 
+                    required 
+                    maxlength="150"
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
+                    placeholder="Korte samenvatting van de module"
+                  />
+                  <p class="text-slate-500 text-sm">Max 150 karakters</p>
+                </div>
+
+                <div class="md:col-span-2 space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Uitgebreide Beschrijving *</label>
+                  <textarea 
+                    v-model="formData.description" 
+                    required 
+                    rows="4"
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400 resize-none"
+                    placeholder="Gedetailleerde beschrijving van de module"
+                  ></textarea>
+                </div>
+
+                <div class="md:col-span-2 space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">Module Inhoud *</label>
+                  <textarea 
+                    v-model="formData.content" 
+                    required 
+                    rows="5"
+                    class="w-full border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400 resize-none"
+                    placeholder="Wat wordt er behandeld in deze module?"
+                  ></textarea>
+                </div>
+              </div>
             </div>
-            <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              {{ success }}
+
+            <!-- Leeruitkomsten sectie -->
+            <div class="space-y-6">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800">Leeruitkomsten</h3>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">Leeruitkomsten *</label>
+                <textarea 
+                  v-model="formData.learningoutcomes" 
+                  required 
+                  rows="6"
+                  class="w-full border border-slate-300 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400 resize-none"
+                  placeholder="A. Eerste leeruitkomst&#10;B. Tweede leeruitkomst&#10;C. Derde leeruitkomst"
+                ></textarea>
+                <p class="text-slate-500 text-sm">
+                  Gebruik het format: A. Eerste leeruitkomst, B. Tweede leeruitkomst, etc.
+                </p>
+              </div>
             </div>
-          </div>
-        </form>
+
+            <!-- Submit knoppen -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-8">
+              <button 
+                type="submit" 
+                :disabled="isSubmitting"
+                class="flex-1 bg-gradient-to-r from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 disabled:from-slate-400 disabled:to-slate-500 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
+              >
+                <svg v-if="isSubmitting" xmlns="http://www.w3.org/2000/svg" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span v-if="isSubmitting">Bezig met bijwerken...</span>
+                <span v-else">Module Bijwerken</span>
+              </button>
+              <router-link 
+                :to="`/modules/${route.params.id}`"
+                class="px-6 py-4 border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 hover:scale-105 text-center flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Annuleren
+              </router-link>
+            </div>
+          
+            <!-- Feedback berichten -->
+            <div v-if="error || success" class="mt-6">
+              <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ error }}
+              </div>
+              <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ success }}
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

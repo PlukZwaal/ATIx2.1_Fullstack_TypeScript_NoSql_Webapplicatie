@@ -6,11 +6,9 @@ const authStore = useAuthStore();
 </script>
 
 <template>
-  <!-- Root container: één keer fullscreen; auth pagina's krijgen geen extra padding om scroll te voorkomen -->
-  <div class="min-h-screen bg-gray-50 flex flex-col">
+  <div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 flex flex-col">
     <Navbar v-if="authStore.isAuthenticated" />
-    <main :class="authStore.isAuthenticated ? 'p-4 flex-1' : 'p-0 flex-1'">
-      <!-- Voor niet ingelogde gebruiker (login/register) centreren we binnen de view component zelf -->
+    <main :class="authStore.isAuthenticated ? 'flex-1' : 'flex-1'">
       <router-view />
     </main>
   </div>

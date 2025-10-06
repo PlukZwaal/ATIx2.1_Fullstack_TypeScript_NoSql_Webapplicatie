@@ -33,13 +33,13 @@ const moduleSchema = new mongoose.Schema<Module>({
         required: true,
     },
     learningoutcomes: {
-        type: [String],
+        type: String,
         required: true,
         validate: {
-            validator: function(v: string[]) {
-                return v && v.length > 0;
+            validator: function(v: string) {
+                return v && v.trim().length > 0;
             },
-            message: 'Er moet minimaal één leeruitkomst zijn gedefinieerd'
+            message: 'Leeruitkomsten zijn verplicht'
         }
     }
 });

@@ -27,8 +27,8 @@ export class ModuleController {
                 return res.status(400).json({ message: 'Studiecredits moeten 0 of hoger zijn' });
             }
 
-            if (!Array.isArray(moduleData.learningoutcomes) || moduleData.learningoutcomes.length === 0) {
-                return res.status(400).json({ message: 'Er moet minimaal één leeruitkomst worden opgegeven' });
+            if (typeof moduleData.learningoutcomes !== 'string' || moduleData.learningoutcomes.trim().length === 0) {
+                return res.status(400).json({ message: 'Leeruitkomsten zijn verplicht en moeten als tekst worden opgegeven' });
             }
 
             const result = await this.moduleService.create(moduleData);
@@ -95,8 +95,8 @@ export class ModuleController {
                 return res.status(400).json({ message: 'Studiecredits moeten 0 of hoger zijn' });
             }
             if (moduleData.learningoutcomes !== undefined && 
-                (!Array.isArray(moduleData.learningoutcomes) || moduleData.learningoutcomes.length === 0)) {
-                return res.status(400).json({ message: 'Er moet minimaal één leeruitkomst worden opgegeven' });
+                (typeof moduleData.learningoutcomes !== 'string' || moduleData.learningoutcomes.trim().length === 0)) {
+                return res.status(400).json({ message: 'Leeruitkomsten zijn verplicht en moeten als tekst worden opgegeven' });
             }
 
             const result = await this.moduleService.update(id, moduleData);
