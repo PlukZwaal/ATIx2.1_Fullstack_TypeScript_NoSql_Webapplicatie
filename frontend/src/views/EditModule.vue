@@ -2,11 +2,11 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
+import { useToast } from '../composables/useToast';
 
 const router = useRouter();
 const route = useRoute();
-const error = ref('');
-const success = ref('');
+const { success: showSuccess, error: showError } = useToast();
 const loading = ref(true);
 const isSubmitting = ref(false);
 
@@ -37,7 +37,7 @@ const loadModule = async () => {
     formData.level = module.level;
     formData.learningoutcomes = module.learningoutcomes;
   } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Fout bij laden module';
+    showError(err?.response?.data?.message || 'Fout bij laden module');
     console.error(err);
   } finally {
     loading.value = false;
@@ -64,12 +64,10 @@ const handleSubmit = async () => {
   
   try {
     isSubmitting.value = true;
-    error.value = '';
-    success.value = '';
     
     const validationError = validateForm();
     if (validationError) {
-      error.value = validationError;
+      showError(validationError);
       return;
     }
     
@@ -80,7 +78,7 @@ const handleSubmit = async () => {
     
     await axios.put(`/api/modules/${route.params.id}`, cleanedData);
     
-    success.value = 'Module succesvol bijgewerkt!';
+    showSuccess('Module succesvol bijgewerkt!');
     
     // Wacht 1 seconde voor feedback en ga dan naar detail pagina
     setTimeout(() => {
@@ -88,7 +86,7 @@ const handleSubmit = async () => {
     }, 1000);
     
   } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Module bijwerken mislukt. Probeer het opnieuw.';
+    showError(err?.response?.data?.message || 'Module bijwerken mislukt. Probeer het opnieuw.');
   } finally {
     isSubmitting.value = false;
   }
@@ -112,27 +110,8 @@ onMounted(() => {
         <p class="text-slate-600 text-xl">Module wordt geladen...</p>
       </div>
 
-      <!-- Error state -->
-      <div v-else-if="error && !formData.name" class="text-center py-16">
-        <div class="bg-red-50 border border-red-200 rounded-2xl p-12 inline-block">
-          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-red-700 mb-4">Er is iets misgegaan</h3>
-          <p class="text-red-600 mb-6">{{ error }}</p>
-          <router-link 
-            to="/modules" 
-            class="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 hover:scale-105"
-          >
-            Terug naar modules
-          </router-link>
-        </div>
-      </div>
-
       <!-- Form content -->
-      <div v-else>
+      <div v-else-if="formData.name">
         <!-- Header -->
         <div class="mb-8">
           <div class="flex items-center gap-4 mb-4">
@@ -298,20 +277,7 @@ onMounted(() => {
             </div>
           
             <!-- Feedback berichten -->
-            <div v-if="error || success" class="mt-6">
-              <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ error }}
-              </div>
-              <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ success }}
-              </div>
-            </div>
+
           </form>
         </div>
       </div>

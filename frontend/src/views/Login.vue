@@ -5,11 +5,6 @@
       <div class="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
         <!-- Header -->
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-red-400 to-rose-500 rounded-full mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
           <h2 class="text-2xl font-bold text-slate-800 mb-2">Welkom terug</h2>
           <p class="text-slate-600">Log in om toegang te krijgen tot je modules</p>
         </div>
@@ -59,9 +54,7 @@
             Inloggen
           </button>
           
-          <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {{ error }}
-          </div>
+
         </form>
 
         <!-- Footer -->
@@ -85,6 +78,54 @@
     </div>
   </div>
 </template>
+
+
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
+
+const router = useRouter();
+const authStore = useAuthStore();
+const { error: showError } = useToast();
+
+const email = ref('');
+const password = ref('');
+
+// Minimale validatie voor login
+const validateForm = () => {
+  // Email format check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    showError('Voer een geldig e-mailadres in');
+    return false;
+  }
+
+  // Check of wachtwoord niet leeg is
+  if (password.value.trim().length === 0) {
+    showError('Voer een wachtwoord in');
+    return false;
+  }
+
+  return true;
+};
+
+const handleSubmit = async () => {
+  try {
+    if (!validateForm()) return;
+    
+    await authStore.login({
+      email: email.value,
+      password: password.value,
+    });
+    router.push('/');
+  } catch (err) {
+    showError('Ongeldige inloggegevens. Controleer je gegevens en probeer opnieuw.');
+  }
+};
+</script>
 
 <style scoped>
 @keyframes blob {
@@ -114,50 +155,3 @@
   animation-delay: 4s;
 }
 </style>
-
-<script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-
-const router = useRouter();
-const authStore = useAuthStore();
-
-const email = ref('');
-const password = ref('');
-const error = ref('');
-
-// Minimale validatie voor login
-const validateForm = () => {
-  // Email format check
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email.value)) {
-    error.value = 'Voer een geldig e-mailadres in';
-    return false;
-  }
-
-  // Check of wachtwoord niet leeg is
-  if (password.value.trim().length === 0) {
-    error.value = 'Voer een wachtwoord in';
-    return false;
-  }
-
-  return true;
-};
-
-const handleSubmit = async () => {
-  try {
-    error.value = '';
-    
-    if (!validateForm()) return;
-    
-    await authStore.login({
-      email: email.value,
-      password: password.value,
-    });
-    router.push('/');
-  } catch (err) {
-    error.value = 'Ongeldige inloggegevens';
-  }
-};
-</script>

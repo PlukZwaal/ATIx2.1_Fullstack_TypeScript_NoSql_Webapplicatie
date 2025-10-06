@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
+import { useToast } from '../composables/useToast';
 
 interface Module {
   id: string;
@@ -17,9 +18,9 @@ interface Module {
 
 const router = useRouter();
 const route = useRoute();
+const { error: showError } = useToast();
 const module = ref<Module | null>(null);
 const loading = ref(true);
-const error = ref('');
 
 const loadModule = async () => {
   try {
@@ -27,7 +28,7 @@ const loadModule = async () => {
     const response = await axios.get(`/api/modules/${route.params.id}`);
     module.value = response.data;
   } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Fout bij laden module';
+    showError(err?.response?.data?.message || 'Fout bij laden module');
     console.error(err);
   } finally {
     loading.value = false;
@@ -45,18 +46,7 @@ onMounted(() => {
   
   // Check voor update melding
   if (router.currentRoute.value.query.updated === 'true') {
-    // Toon een tijdelijke success message
-    const successEl = document.createElement('div');
-    successEl.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
-    successEl.textContent = 'Module succesvol bijgewerkt!';
-    document.body.appendChild(successEl);
-    
-    // Verwijder melding na 3 seconden
-    setTimeout(() => {
-      document.body.removeChild(successEl);
-    }, 3000);
-    
-    // Clean URL
+    // Clean URL zonder extra melding (toast is al getoond in EditModule)
     router.replace({ path: `/modules/${route.params.id}` });
   }
 });
@@ -73,22 +63,6 @@ onMounted(() => {
           </svg>
         </div>
         <p class="text-slate-600 text-xl">Module wordt geladen...</p>
-      </div>
-
-      <!-- Error state -->
-      <div v-else-if="error" class="text-center py-16">
-        <div class="bg-red-50 border border-red-200 rounded-2xl p-12 inline-block">
-          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-red-700 mb-4">Er is een fout opgetreden</h3>
-          <p class="text-red-600 mb-6">{{ error }}</p>
-          <button @click="goBack" class="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 hover:scale-105">
-            Terug naar modules
-          </button>
-        </div>
       </div>
 
       <!-- Module content -->

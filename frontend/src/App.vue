@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Navbar from './components/Navbar.vue';
+import ToastContainer from './components/ToastContainer.vue';
 import { useAuthStore } from './stores/auth';
 
 const authStore = useAuthStore();
@@ -11,5 +12,6 @@ const authStore = useAuthStore();
     <main :class="authStore.isAuthenticated ? 'flex-1' : 'flex-1'">
       <router-view />
     </main>
+    <ToastContainer />
   </div>
 </template>

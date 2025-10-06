@@ -187,20 +187,7 @@
           </div>
         
           <!-- Feedback berichten -->
-          <div v-if="error || success" class="mt-6">
-            <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {{ error }}
-            </div>
-            <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {{ success }}
-            </div>
-          </div>
+
         </form>
       </div>
     </div>
@@ -211,10 +198,10 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useToast } from '../composables/useToast';
 
 const router = useRouter();
-const error = ref('');
-const success = ref('');
+const { success: showSuccess, error: showError } = useToast();
 const isSubmitting = ref(false);
 
 const formData = reactive({
@@ -248,12 +235,10 @@ const handleSubmit = async () => {
   
   try {
     isSubmitting.value = true;
-    error.value = '';
-    success.value = '';
     
     const validationError = validateForm();
     if (validationError) {
-      error.value = validationError;
+      showError(validationError);
       return;
     }
     
@@ -264,15 +249,16 @@ const handleSubmit = async () => {
     
     await axios.post('/api/modules', cleanedData);
     
-    success.value = 'Module succesvol aangemaakt!';
+    // Toon success melding en ga naar modules pagina
+    showSuccess('Module succesvol aangemaakt!');
     
-    // Wacht 1 seconde voor feedback en ga dan naar modules pagina
+    // Kort wachten voor feedback, dan doorsturen
     setTimeout(() => {
-      router.push('/modules?created=true');
+      router.push('/modules');
     }, 1000);
     
   } catch (err: any) {
-    error.value = err?.response?.data?.message || 'Module aanmaken mislukt. Probeer het opnieuw.';
+    showError(err?.response?.data?.message || 'Module aanmaken mislukt. Probeer het opnieuw.');
   } finally {
     isSubmitting.value = false;
   }

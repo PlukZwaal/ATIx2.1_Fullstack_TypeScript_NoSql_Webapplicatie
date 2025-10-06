@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useToast } from '../composables/useToast';
 
 interface Module {
   id: string;
@@ -16,10 +17,9 @@ interface Module {
 }
 
 const router = useRouter();
+const { success: showSuccess, error: showError } = useToast();
 const modules = ref<Module[]>([]);
 const loading = ref(true);
-const error = ref('');
-const successMessage = ref('');
 
 // Filter state
 const filterOptions = ref<{
@@ -83,7 +83,7 @@ const loadModules = async () => {
     const response = await axios.get(url);
     modules.value = response.data;
   } catch (err) {
-    error.value = 'Fout bij laden modules';
+    showError('Fout bij laden modules');
     console.error(err);
   } finally {
     loading.value = false;
@@ -96,26 +96,17 @@ onMounted(async () => {
   // Dan modules
   await loadModules();
   
-  // Check voor succesmelding vanuit route state
+  // Clean up query parameters zonder extra meldingen te tonen
   if (router.currentRoute.value.query.created === 'true') {
-    successMessage.value = 'Module succesvol aangemaakt!';
-    // Verwijder de query parameter uit de URL
+    // Verwijder de query parameter uit de URL (toast is al getoond in CreateModule)
     router.replace({ path: '/modules' });
-    // Verberg de melding na 3 seconden
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
   }
   
   // Check voor delete melding
   if (router.currentRoute.value.query.deleted === 'true') {
-    successMessage.value = 'Module succesvol verwijderd!';
+    showSuccess('Module succesvol verwijderd!');
     // Verwijder de query parameter uit de URL
     router.replace({ path: '/modules' });
-    // Verberg de melding na 3 seconden
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
   }
   
   // Close menus when clicking outside
@@ -172,12 +163,9 @@ const deleteModule = async (moduleId: string, event: Event) => {
     await axios.delete(`/api/modules/${moduleId}`);
     // Herlaad modules
     loadModules();
-    successMessage.value = 'Module succesvol verwijderd!';
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
+    showSuccess('Module succesvol verwijderd!');
   } catch (err: any) {
-    alert(err?.response?.data?.message || 'Fout bij verwijderen module');
+    showError(err?.response?.data?.message || 'Fout bij verwijderen module');
   }
 };
 
@@ -239,13 +227,9 @@ const clearFilters = () => {
         </button>
       </div>
 
-      <!-- Succesmelding -->
-      <div v-if="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        {{ successMessage }}
-      </div>
+
+
+
 
       <!-- Grid layout: Filter sidebar + Modules -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -347,19 +331,7 @@ const clearFilters = () => {
           <p class="text-slate-600 text-lg">Modules laden...</p>
         </div>
 
-        <div v-else-if="error" class="text-center py-16">
-          <div class="bg-red-50 border border-red-200 rounded-2xl p-8 inline-block">
-            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p class="text-red-700 text-lg font-semibold mb-4">{{ error }}</p>
-            <button @click="loadModules" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105">
-              Opnieuw proberen
-            </button>
-          </div>
-        </div>
+
 
         <div v-else-if="modules.length === 0" class="text-center py-16">
           <div class="bg-slate-50 border border-slate-200 rounded-2xl p-12 inline-block">

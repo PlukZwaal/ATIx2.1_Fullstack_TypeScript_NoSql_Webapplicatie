@@ -36,8 +36,8 @@ const moduleSchema = new mongoose.Schema<Module>({
         type: String,
         required: true,
         validate: {
-            validator: function(v: string) {
-                return v && v.trim().length > 0;
+            validator: function(v: string): boolean {
+                return !!(v && v.trim().length > 0);
             },
             message: 'Leeruitkomsten zijn verplicht'
         }
