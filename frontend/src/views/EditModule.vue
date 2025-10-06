@@ -80,9 +80,12 @@ const handleSubmit = async () => {
     
     showSuccess('Module succesvol bijgewerkt!');
     
-    // Wacht 1 seconde voor feedback en ga dan naar detail pagina
+    // Wacht 1 seconde voor feedback en ga dan naar modules overzicht
     setTimeout(() => {
-      router.push(`/modules/${route.params.id}?updated=true`);
+      router.push('/modules').then(() => {
+        // Scroll naar bovenkant van pagina na navigatie
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }, 1000);
     
   } catch (err: any) {

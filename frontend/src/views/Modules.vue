@@ -192,6 +192,8 @@ const deleteModule = async (moduleId: string, event: Event) => {
     // Herlaad modules
     loadModules();
     showSuccess('Module succesvol verwijderd!');
+    // Scroll naar bovenkant van pagina
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err: any) {
     showError(err?.response?.data?.message || 'Fout bij verwijderen module');
   }
@@ -500,7 +502,7 @@ const clearFilters = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                   </svg>
-                  {{ module.studycredit }} credits
+                  {{ module.studycredit }} ECTS
                 </span>
                 <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

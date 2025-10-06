@@ -20,8 +20,8 @@ export class ModuleService {
             }
         }
 
-        if (data.studycredit !== undefined && data.studycredit < 0) {
-            throw new Error('Studiecredits kunnen niet negatief zijn');
+        if (data.studycredit !== undefined && data.studycredit < 1) {
+            throw new Error('Studiecredits moeten minimaal 1 zijn');
         }
     }
 
