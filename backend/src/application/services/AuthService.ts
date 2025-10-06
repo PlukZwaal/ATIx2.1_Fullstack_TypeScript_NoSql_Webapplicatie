@@ -3,7 +3,15 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserLogin, AuthResponse } from '../../core/entities/User';
 import { UserModel } from '../../infrastructure/models/UserModel';
-import { validateRegisterInput, validateLoginInput, normalizeRegisterInput, normalizeLoginInput } from '../utils/validation';
+
+// Simpele validatie helpers
+const isValidEmail = (email: string): boolean => {
+  return email.includes('@') && email.includes('.');
+};
+
+const isValidPassword = (password: string): boolean => {
+  return password.length >= 6;
+};
 
 export class AuthService {
     constructor() {
@@ -12,20 +20,30 @@ export class AuthService {
 
     // Nieuwe gebruiker registreren: valideer input, check of email al bestaat, hash wachtwoord en maak token
     async register(userData: User): Promise<AuthResponse> {
-        userData = normalizeRegisterInput(userData as any) as User;
-        const regValidation = validateRegisterInput(userData.name, userData.email, userData.password);
-        if (!regValidation.valid) {
-            throw new Error(regValidation.message);
+        // Simpele validatie
+        if (!userData.name?.trim() || userData.name.trim().length < 2) {
+            throw new Error('Naam moet minimaal 2 karakters bevatten');
+        }
+        if (!isValidEmail(userData.email)) {
+            throw new Error('Ongeldig e-mailadres');
+        }
+        if (!isValidPassword(userData.password)) {
+            throw new Error('Wachtwoord moet minimaal 6 karakters bevatten');
         }
         
-        const existingUser = await UserModel.findOne({ email: userData.email });
+        // Normaliseer data
+        const email = userData.email.trim().toLowerCase();
+        const name = userData.name.trim();
+        
+        const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
             throw new Error('E-mailadres is al geregistreerd');
         }
 
         const hashedPassword = await bcrypt.hash(userData.password, 10);
         const user = await UserModel.create({
-            ...userData,
+            name,
+            email,
             password: hashedPassword,
         });
 
@@ -42,19 +60,23 @@ export class AuthService {
 
     // Gebruiker inloggen: valideer input, zoek gebruiker, vergelijk wachtwoord en geef token terug
     async login(credentials: UserLogin): Promise<AuthResponse> {
-        credentials = normalizeLoginInput(credentials as any) as UserLogin;
-        const loginValidation = validateLoginInput(credentials.email, credentials.password);
-        if (!loginValidation.valid) {
-            throw new Error(loginValidation.message);
+        // Simpele validatie
+        if (!isValidEmail(credentials.email)) {
+            throw new Error('Ongeldig e-mailadres');
+        }
+        if (!credentials.password) {
+            throw new Error('Wachtwoord is verplicht');
         }
         
-        const user = await UserModel.findOne({ email: credentials.email });
+        const email = credentials.email.trim().toLowerCase();
+        
+        const user = await UserModel.findOne({ email });
         if (!user) {
             throw new Error('Ongeldige inloggegevens');
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
-        if (!isValidPassword) {
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isPasswordValid) {
             throw new Error('Ongeldige inloggegevens');
         }
 
