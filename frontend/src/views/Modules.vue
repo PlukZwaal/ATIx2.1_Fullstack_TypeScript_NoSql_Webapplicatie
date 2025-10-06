@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useToast } from '../composables/useToast';
@@ -42,7 +42,18 @@ const selectedFilters = ref<{
   levels: []
 });
 
+const searchQuery = ref('');
 const showMenus = ref<{[key: string]: boolean}>({});
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+// Configureerbare zoek delay (in milliseconden)
+const SEARCH_DELAY = 1000; // Je kunt dit aanpassen naar wat je wilt
+
+// Paginering
+const currentPage = ref(1);
+const modulesPerPage = 25;
+const totalModules = ref(0);
+const allModules = ref<Module[]>([]);
 const loadFilterOptions = async () => {
   try {
     const response = await axios.get('/api/modules/filter-options');
@@ -58,6 +69,11 @@ const loadModules = async () => {
     
     // Build query parameters
     const params = new URLSearchParams();
+    
+    // Add search query if exists
+    if (searchQuery.value.trim()) {
+      params.append('search', searchQuery.value.trim());
+    }
     
     if (selectedFilters.value.locations.length > 0) {
       selectedFilters.value.locations.forEach(location => {
@@ -81,13 +97,25 @@ const loadModules = async () => {
     const url = queryString ? `/api/modules?${queryString}` : '/api/modules';
     
     const response = await axios.get(url);
-    modules.value = response.data;
+    allModules.value = response.data;
+    totalModules.value = allModules.value.length;
+    
+    // Reset naar pagina 1 bij nieuwe zoekactie/filter
+    currentPage.value = 1;
+    updateDisplayedModules();
   } catch (err) {
     showError('Fout bij laden modules');
     console.error(err);
   } finally {
     loading.value = false;
   }
+};
+
+// Update displayed modules based on current page
+const updateDisplayedModules = () => {
+  const startIndex = (currentPage.value - 1) * modulesPerPage;
+  const endIndex = startIndex + modulesPerPage;
+  modules.value = allModules.value.slice(startIndex, endIndex);
 };
 
 onMounted(async () => {
@@ -199,6 +227,46 @@ const toggleLevelFilter = (level: string) => {
   loadModules();
 };
 
+// Debounced search functie
+const debouncedSearch = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    loadModules();
+  }, SEARCH_DELAY); // Gebruikt de configureerbare delay
+};
+
+// Paginering functies
+const totalPages = computed(() => Math.ceil(totalModules.value / modulesPerPage));
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    updateDisplayedModules();
+    // Scroll naar bovenkant van pagina
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    updateDisplayedModules();
+    // Scroll naar bovenkant van pagina
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    updateDisplayedModules();
+    // Scroll naar bovenkant van pagina
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
 const clearFilters = () => {
   selectedFilters.value.locations = [];
   selectedFilters.value.studyCredits = [];
@@ -237,10 +305,26 @@ const clearFilters = () => {
       <div class="lg:col-span-1">
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
           <div class="flex items-center gap-2 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             <h3 class="text-lg font-semibold text-slate-800">Filters</h3>
+          </div>
+
+          <!-- Zoekbalk -->
+          <div class="mb-6">
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input 
+                v-model="searchQuery"
+                @input="debouncedSearch"
+                type="text"
+                placeholder="Zoek modules..."
+                class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+            </div>
           </div>
           
           <!-- Locatie filter -->
@@ -435,6 +519,44 @@ const clearFilters = () => {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Paginering -->
+        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
+          <div class="flex items-center gap-2">
+            <!-- Vorige pagina knop -->
+            <button 
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'"
+              class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors"
+            >
+              ←
+            </button>
+
+            <!-- Pagina nummers -->
+            <template v-for="page in totalPages" :key="page">
+              <button 
+                v-if="page <= 5 || (totalPages > 5 && page === totalPages)"
+                @click="goToPage(page)"
+                :class="currentPage === page ? 'bg-red-500 text-white' : 'bg-white text-slate-700 hover:bg-red-100'"
+                class="px-3 py-2 rounded-lg border border-slate-200 transition-colors min-w-[40px]"
+              >
+                {{ page }}
+              </button>
+              <span v-if="totalPages > 5 && page === 5 && totalPages > 6" class="px-2 text-slate-500">...</span>
+            </template>
+
+            <!-- Volgende pagina knop -->
+            <button 
+              @click="nextPage"
+              :disabled="currentPage === totalPages"
+              :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'"
+              class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors"
+            >
+              →
+            </button>
           </div>
         </div>
       </div>

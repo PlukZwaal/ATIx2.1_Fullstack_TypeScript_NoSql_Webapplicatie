@@ -10,42 +10,27 @@ export class ModuleController {
         this.moduleService = new ModuleService(); 
     }
 
-    // Module maken: valideer alle velden, check studiecredits en leeruitkomsten, laat service het aanmaken
+    // Module maken: laat service alle validatie en aanmaak doen
     create = async (req: Request, res: Response) => {
         try {
-            const moduleData: Module = req.body;
-            
-            if (!moduleData.name || !moduleData.shortdescription || !moduleData.description || 
-                !moduleData.content || !moduleData.location || !moduleData.level ||
-                moduleData.studycredit === undefined || !moduleData.learningoutcomes) {
-                return res.status(400).json({ 
-                    message: 'Alle velden zijn verplicht: name, shortdescription, description, content, studycredit, location, level, learningoutcomes' 
-                });
-            }
-
-            if (moduleData.studycredit < 0) {
-                return res.status(400).json({ message: 'Studiecredits moeten 0 of hoger zijn' });
-            }
-
-            if (typeof moduleData.learningoutcomes !== 'string' || moduleData.learningoutcomes.trim().length === 0) {
-                return res.status(400).json({ message: 'Leeruitkomsten zijn verplicht en moeten als tekst worden opgegeven' });
-            }
-
-            const result = await this.moduleService.create(moduleData);
+            const result = await this.moduleService.create(req.body);
             res.status(201).json(result);
         } catch (error) {
             res.status(400).json({ message: error instanceof Error ? error.message : 'Module aanmaken mislukt' });
         }
     };
 
-    // Alle modules ophalen: check of er filters zijn (locatie, credits, niveau), parse ze en geef door aan service
+    // Alle modules ophalen: check of er filters zijn (locatie, credits, niveau, zoekterm), parse ze en geef door aan service
     getAll = async (req: Request, res: Response) => {
         try {
-            const { locations, studyCredits, levels } = req.query;
+            const { locations, studyCredits, levels, search } = req.query;
             
-            if (locations || studyCredits || levels) {
-                const filters: {locations?: string[], studyCredits?: number[], levels?: string[]} = {};
+            if (locations || studyCredits || levels || search) {
+                const filters: {locations?: string[], studyCredits?: number[], levels?: string[], search?: string} = {};
                 
+                if (search) {
+                    filters.search = search as string;
+                }
                 if (locations) {
                     filters.locations = Array.isArray(locations) ? locations as string[] : [locations as string];
                 }
@@ -84,22 +69,11 @@ export class ModuleController {
         }
     };
 
-    // Module bijwerken: pak ID en data, valideer studiecredits en leeruitkomsten, update via service
+    // Module bijwerken: laat service alle validatie en update doen
     update = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const moduleData: Partial<Module> = req.body;
-            
-            // Validatie: studiecredits moeten positief zijn, leeruitkomsten moeten bestaan
-            if (moduleData.studycredit !== undefined && moduleData.studycredit < 0) {
-                return res.status(400).json({ message: 'Studiecredits moeten 0 of hoger zijn' });
-            }
-            if (moduleData.learningoutcomes !== undefined && 
-                (typeof moduleData.learningoutcomes !== 'string' || moduleData.learningoutcomes.trim().length === 0)) {
-                return res.status(400).json({ message: 'Leeruitkomsten zijn verplicht en moeten als tekst worden opgegeven' });
-            }
-
-            const result = await this.moduleService.update(id, moduleData);
+            const result = await this.moduleService.update(id, req.body);
             
             if (!result) {
                 return res.status(404).json({ message: 'Module niet gevonden' });

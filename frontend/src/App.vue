@@ -7,7 +7,7 @@ const authStore = useAuthStore();
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 flex flex-col">
+  <div class="min-h-screen bg-red-50 flex flex-col">
     <Navbar v-if="authStore.isAuthenticated" />
     <main :class="authStore.isAuthenticated ? 'flex-1' : 'flex-1'">
       <router-view />
