@@ -2,25 +2,17 @@
   <nav class="bg-white/80 backdrop-blur-md border-b border-red-100/60 sticky top-0 z-50 shadow-sm">
     <div class="container mx-auto px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo + links -->
         <div class="flex items-center gap-10">
-          <router-link to="/" class="font-bold text-xl text-slate-800 hover:text-red-600 transition-all duration-200">
+          <router-link to="/" class="font-bold text-xl text-slate-800 hover:text-red-600 transition-colors">
             <span class="bg-gradient-to-r from-red-500 to-rose-600 bg-clip-text text-transparent">Avans</span> Modules
           </router-link>
           
-          <!-- Navigation links -->
           <div v-if="authStore.isAuthenticated" class="hidden md:flex items-center gap-8">
-            <router-link 
-              to="/modules" 
-              class="text-slate-600 hover:text-slate-900 font-medium transition-all duration-200 hover:scale-105 relative group"
-            >
+            <router-link to="/modules" class="text-slate-600 hover:text-slate-900 font-medium transition-colors relative group">
               Modules
-              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all duration-200 group-hover:w-full"></span>
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
             </router-link>
-            <router-link 
-              to="/modules/create" 
-              class="bg-gradient-to-r from-red-500 to-rose-500 text-white px-4 py-2 rounded-lg font-medium hover:from-red-600 hover:to-rose-600 hover:shadow-lg transition-all duration-200 hover:scale-105"
-            >
+            <router-link to="/modules/create" class="bg-gradient-to-r from-red-500 to-rose-500 text-white px-4 py-2 rounded-lg font-medium hover:from-red-600 hover:to-rose-600 hover:shadow-lg transition-colors">
               + Nieuwe Module
             </router-link>
           </div>
@@ -34,24 +26,14 @@
             </div>
             <span class="text-slate-700 font-medium">{{ authStore.user?.name }}</span>
           </div>
-          <button 
-            @click="handleLogout" 
-            class="text-slate-500 hover:text-red-600 transition-all duration-200 p-2 rounded-lg hover:bg-red-50"
-            title="Uitloggen"
-          >
+          <button @click="handleLogout" class="text-slate-500 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50" title="Uitloggen">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
           </button>
         </div>
 
-        <!-- Mobile menu button -->
-        <button
-          v-if="authStore.isAuthenticated"
-          @click="menuOpen = !menuOpen"
-          class="md:hidden text-slate-600 hover:text-slate-900 transition-colors p-2"
-          aria-label="Menu"
-        >
+        <button v-if="authStore.isAuthenticated" @click="menuOpen = !menuOpen" class="md:hidden text-slate-600 hover:text-slate-900 transition-colors p-2" aria-label="Menu">
           <svg v-if="!menuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>

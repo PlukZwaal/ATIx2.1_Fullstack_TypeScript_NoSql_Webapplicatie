@@ -128,7 +128,7 @@
                   v-model="formData.level" 
                   required 
                   class="w-full border border-slate-300 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400"
-                  placeholder="Bijv. Beginnend, Gevorderd, Expert"
+                  placeholder="Schrijf hier over het niveau..."
                 />
               </div>
             </div>
@@ -151,10 +151,10 @@
                 required 
                 rows="6"
                 class="w-full border border-slate-300 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-20 px-4 py-3 rounded-xl transition-all duration-200 placeholder-slate-400 resize-none"
-                placeholder="A. Eerste leeruitkomst&#10;B. Tweede leeruitkomst&#10;C. Derde leeruitkomst"
+                placeholder="Schrijf hier over de leeruitkomsten..."
               ></textarea>
               <p class="text-slate-500 text-sm">
-                Gebruik het format: A. Eerste leeruitkomst, B. Tweede leeruitkomst, etc.
+                Beschrijf hier wat studenten zullen leren en kunnen na afloop van deze module.
               </p>
             </div>
           </div>

@@ -419,16 +419,7 @@ const clearFilters = () => {
 
         <div v-else-if="modules.length === 0" class="text-center py-16">
           <div class="bg-slate-50 border border-slate-200 rounded-2xl p-12 inline-block">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-slate-700 mb-3">Geen modules gevonden</h3>
-            <p class="text-slate-500 mb-6 max-w-md">Er zijn nog geen modules beschikbaar of je filters hebben geen resultaten opgeleverd.</p>
-            <button @click="goToCreate" class="bg-gradient-to-r from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg">
-              Eerste Module Maken
-            </button>
+            <h3 class="text-xl font-semibold text-slate-700">Geen modules gevonden</h3>
           </div>
         </div>
 
