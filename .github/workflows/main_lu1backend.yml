@@ -46,6 +46,19 @@ jobs:
           if [ -d dist ]; then cp -r dist deploy/; fi
           if [ -f .env.example ]; then cp .env.example deploy/; fi
 
+      - name: Install production dependencies in deploy artifact
+        working-directory: backend/deploy
+        run: |
+          npm ci --omit=dev
+          ls -al
+          du -sh . || true
+
+      - name: List deploy contents (debug)
+        working-directory: backend
+        run: |
+          echo "===== deploy tree ====="
+          find deploy -maxdepth 2 -type f -print
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
