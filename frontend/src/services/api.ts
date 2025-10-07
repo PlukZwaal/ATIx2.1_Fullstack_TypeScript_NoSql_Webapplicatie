@@ -12,10 +12,15 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-// Gebruik uitsluitend de env variabele (moet gezet zijn bij build). Geen fallbacks.
-const api = axios.create({
-  baseURL: (import.meta as any).env?.VITE_API_URL,
-});
+// Pak uitsluitend de build-time variabele
+const base = (import.meta as any).env?.VITE_API_URL as string | undefined;
+if (!base) {
+  // Direct laten crashen zodat je het meteen ziet in console i.p.v. silent naar localhost (relative path)
+  throw new Error('VITE_API_URL ontbreekt tijdens build. Zet deze in Azure Static Web App (Configuration) of in de workflow.');
+}
+console.log('[API] Using base URL:', base);
+
+const api = axios.create({ baseURL: base });
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
