@@ -31,11 +31,12 @@ app.post('/api/auth/login', authController.login);
 app.get('/api/auth/me', authMiddleware, (req: any, res) => res.json({ id: req.userId }));
 app.get('/api/user/profile', authMiddleware, (_req, res) => res.json({ message: 'Toegang tot beveiligd profiel' }));
 
-app.post('/api/modules', moduleController.create);
-app.get('/api/modules', moduleController.getAll);
-app.get('/api/modules/filter-options', moduleController.getFilterOptions);
-app.get('/api/modules/:id', moduleController.getById);
-app.put('/api/modules/:id', moduleController.update);
-app.delete('/api/modules/:id', moduleController.delete);
+// Beveiligde module routes - alleen toegankelijk met geldige token
+app.post('/api/modules', authMiddleware, moduleController.create);
+app.get('/api/modules', authMiddleware, moduleController.getAll);
+app.get('/api/modules/filter-options', authMiddleware, moduleController.getFilterOptions);
+app.get('/api/modules/:id', authMiddleware, moduleController.getById);
+app.put('/api/modules/:id', authMiddleware, moduleController.update);
+app.delete('/api/modules/:id', authMiddleware, moduleController.delete);
 
 app.listen(process.env.PORT, () => console.log(`Server draait op http://localhost:${process.env.PORT}`));

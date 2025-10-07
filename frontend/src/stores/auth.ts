@@ -1,12 +1,5 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
-
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import api from '../services/api';
 
 // Type: user payload uit backend
 interface User {
@@ -50,14 +43,14 @@ export const useAuthStore = defineStore('auth', {
 
                 async login(credentials: LoginCredentials) {
                     const normalizedEmail = credentials.email.trim().toLowerCase();
-                    const response = await api.post('/login', { ...credentials, email: normalizedEmail });
+                    const response = await api.post('/api/auth/login', { ...credentials, email: normalizedEmail });
                     this.saveUserData(response.data.token, response.data.user);
                     return response.data;
                 },
 
                 async register(data: RegisterData) {
                     const normalizedEmail = data.email.trim().toLowerCase();
-                    const response = await api.post('/register', { ...data, email: normalizedEmail });
+                    const response = await api.post('/api/auth/register', { ...data, email: normalizedEmail });
                     this.saveUserData(response.data.token, response.data.user);
                     return response.data;
                 },

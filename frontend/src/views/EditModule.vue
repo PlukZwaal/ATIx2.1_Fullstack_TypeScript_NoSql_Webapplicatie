@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import api from '../services/api';
 import { useToast } from '../composables/useToast';
 
 const router = useRouter();
@@ -24,7 +24,7 @@ const formData = reactive({
 const loadModule = async () => {
   try {
     loading.value = true;
-    const response = await axios.get(`/api/modules/${route.params.id}`);
+    const response = await api.get(`/api/modules/${route.params.id}`);
     const module = response.data;
     
     // Vul formulier met bestaande data
@@ -76,7 +76,7 @@ const handleSubmit = async () => {
       ...formData
     };
     
-    await axios.put(`/api/modules/${route.params.id}`, cleanedData);
+    await api.put(`/api/modules/${route.params.id}`, cleanedData);
     
     showSuccess('Module succesvol bijgewerkt!');
     

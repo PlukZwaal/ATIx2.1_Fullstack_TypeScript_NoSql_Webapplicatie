@@ -197,7 +197,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '../services/api';
 import { useToast } from '../composables/useToast';
 
 const router = useRouter();
@@ -247,7 +247,7 @@ const handleSubmit = async () => {
       ...formData
     };
     
-    await axios.post('/api/modules', cleanedData);
+    await api.post('/api/modules', cleanedData);
     
     // Toon success melding en ga naar modules pagina
     showSuccess('Module succesvol aangemaakt!');

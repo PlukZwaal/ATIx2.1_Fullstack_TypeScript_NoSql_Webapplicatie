@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '../services/api';
 import { useToast } from '../composables/useToast';
 
 interface Module {
@@ -56,7 +56,7 @@ const totalModules = ref(0);
 const allModules = ref<Module[]>([]);
 const loadFilterOptions = async () => {
   try {
-    const response = await axios.get('/api/modules/filter-options');
+    const response = await api.get('/api/modules/filter-options');
     filterOptions.value = response.data;
   } catch (err) {
     console.error('Fout bij laden filter opties:', err);
@@ -96,7 +96,7 @@ const loadModules = async () => {
     const queryString = params.toString();
     const url = queryString ? `/api/modules?${queryString}` : '/api/modules';
     
-    const response = await axios.get(url);
+    const response = await api.get(url);
     allModules.value = response.data;
     totalModules.value = allModules.value.length;
     
@@ -188,7 +188,7 @@ const deleteModule = async (moduleId: string, event: Event) => {
   }
   
   try {
-    await axios.delete(`/api/modules/${moduleId}`);
+    await api.delete(`/api/modules/${moduleId}`);
     // Herlaad modules
     loadModules();
     showSuccess('Module succesvol verwijderd!');
