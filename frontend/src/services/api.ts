@@ -13,16 +13,8 @@ import type {
 import { STORAGE_KEYS } from '../constants';
 
 const baseURL = import.meta.env.VITE_API_URL;
-
-if (!baseURL) {
-  // Optioneel: gooi een foutmelding als de variabele niet is ingesteld
-  console.error("Omgevingsvariabele VITE_API_URL is niet ingesteld!");
-  // Of stel een fallback in als dat nodig is
-  // throw new Error("API URL missing!");
-}
-
 const api = axios.create({ baseURL });
-console.log('API base URL:', baseURL);
+
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
