@@ -1,12 +1,14 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - lu1frontend
+name: Frontend Deploy (lu1frontend)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/main_lu1frontend.yml'
   workflow_dispatch:
 
 jobs:
@@ -23,17 +25,22 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm install, build, and test
+      - name: Install & Build (frontend only)
+        working-directory: frontend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm ci
+          npm run build
+          # zip dist voor deploy
+          cd dist
+          zip -r ../../frontend-dist.zip .
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: .
+          name: frontend-artifact
+          path: frontend-dist.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,10 +50,16 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: frontend-artifact
+          path: .
+
+      - name: Unzip dist
+        run: |
+          mkdir dist
+          unzip frontend-dist.zip -d dist
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -61,5 +74,8 @@ jobs:
         with:
           app-name: 'lu1frontend'
           slot-name: 'Production'
-          package: .
+          package: dist
+
+      - name: Done
+        run: echo "Frontend deployment complete"
           
