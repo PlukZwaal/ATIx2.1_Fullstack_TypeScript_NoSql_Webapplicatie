@@ -12,9 +12,15 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-// TEMP: hardcoded base URL for debugging (remove after test)
-const api = axios.create({ baseURL: 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net' });
-console.log('API base URL (HARDCODED TEST):', 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net');
+// Gebruik build-time env variabele (moet tijdens CI aanwezig zijn)
+const resolvedBase = import.meta.env.VITE_API_URL as string | undefined;
+if (!resolvedBase) {
+  console.warn('[API] VITE_API_URL ontbreekt -> gebruikt relative paths (kan leiden tot verkeerde host)');
+}
+console.log('[API] Base URL (ENV):', resolvedBase);
+// Voor noodgeval hardcode (laat uit-gecomment):
+// const api = axios.create({ baseURL: 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net' });
+const api = axios.create({ baseURL: resolvedBase });
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
