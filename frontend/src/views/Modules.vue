@@ -221,7 +221,6 @@ const deleteModule = async (moduleId: string, event: Event) => {
     await apiDeleteModule(moduleId);
     loadModules();
     showSuccess('Module succesvol verwijderd!');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err: any) {
     showError(err?.response?.data?.message || 'Fout bij verwijderen module');
   }

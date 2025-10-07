@@ -52,7 +52,11 @@ const router = createRouter({
       name: 'not-found',
       component: () => import('../views/NotFound.vue')
     }
-  ]
+  ],
+  scrollBehavior() {
+    // Scroll altijd naar boven bij navigatie
+    return { top: 0 };
+  }
 })
 
 // Controleer bij elke route of gebruiker toegang heeft

@@ -255,10 +255,7 @@ const handleSubmit = async () => {
     
     // Kort wachten voor feedback, dan doorsturen
     setTimeout(() => {
-      router.push('/modules').then(() => {
-        // Scroll naar bovenkant van pagina na navigatie
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      router.push('/modules');
     }, 1000);
     
   } catch (err: any) {
