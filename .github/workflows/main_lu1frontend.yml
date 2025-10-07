@@ -10,7 +10,7 @@ on:
       - 'frontend/**'
       - '.github/workflows/main_lu1frontend.yml'
   workflow_dispatch:
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
