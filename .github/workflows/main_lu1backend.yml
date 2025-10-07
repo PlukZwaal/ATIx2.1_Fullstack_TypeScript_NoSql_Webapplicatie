@@ -61,5 +61,5 @@ jobs:
           package: backend/deploy
 
       - name: Done
-        run: echo "Backend deployed from backend/ directory" 
+        run: echo "Backend deployed from backend/ directory"  
           
