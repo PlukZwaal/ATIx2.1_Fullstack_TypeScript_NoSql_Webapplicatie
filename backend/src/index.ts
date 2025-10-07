@@ -38,7 +38,7 @@ if (HAS_MONGODB_URI) {
             console.error('MongoDB verbindingsfout (server blijft draaien):', err.message);
         });
 } else {
-    console.warn('MONGODB_URI ontbreekt – database functies niet beschikbaar.');
+    console.warn('MONGODB_URI ontbreekt – database functies niet beschikbaar.'); 
 }
 
 // Middleware die DB vereist voor bepaalde routes

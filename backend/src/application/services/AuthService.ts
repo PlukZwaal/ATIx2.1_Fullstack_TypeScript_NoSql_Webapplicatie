@@ -38,7 +38,7 @@ export class AuthService {
         const user = await UserModel.create({
             name,
             email,
-            password: await bcrypt.hash(userData.password, 10),
+            password: await bcrypt.hash(userData.password, 10), 
         });
 
         // Genereer JWT token en stuur terug
