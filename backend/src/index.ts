@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Import packages
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { AuthController } from './infrastructure/controllers/AuthController';
@@ -26,8 +26,11 @@ app.use(express.json());
 // Verbind met MongoDB database
 mongoose
     .connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB verbonden'))
-    .catch(err => console.error('MongoDB fout:', err));
+    .then(() => console.log('✅ MongoDB verbonden'))
+    .catch(err => {
+        console.error('❌ MongoDB verbindingsfout:', err);
+        process.exit(1); // Stop de server als database niet bereikbaar is
+    });
 
 // Maak controllers aan
 const authController = new AuthController();
@@ -38,7 +41,6 @@ const userController = new UserController();
 app.post('/api/auth/register', authController.register);
 app.post('/api/auth/login', authController.login);
 app.get('/api/auth/me', authMiddleware, (req: any, res) => res.json({ id: req.userId }));
-app.get('/api/user/profile', authMiddleware, (_req, res) => res.json({ message: 'Toegang tot beveiligd profiel' }));
 
 // Module routes (login verplicht via authMiddleware)
 app.post('/api/modules', authMiddleware, moduleController.create);
@@ -52,5 +54,17 @@ app.delete('/api/modules/:id', authMiddleware, moduleController.delete);
 app.post('/api/favorites/:moduleId', authMiddleware, userController.toggleFavorite);
 app.get('/api/favorites', authMiddleware, userController.getFavorites);
 
+// 404 handler - alle routes die niet bestaan
+app.use((_req: Request, res: Response) => {
+    res.status(404).json({ message: 'Route niet gevonden' });
+});
+
+// Globale error handler
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('❌ Server error:', err);
+    res.status(500).json({ message: 'Er is iets misgegaan op de server' });
+});
+
 // Start de server
-app.listen(process.env.PORT, () => console.log(`Server draait op http://localhost:${process.env.PORT}`));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server draait op http://localhost:${PORT}`));

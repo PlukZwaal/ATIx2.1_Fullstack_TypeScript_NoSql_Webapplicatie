@@ -1,20 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import api from '../services/api';
+import { getModuleById } from '../services/api';
 import { useToast } from '../composables/useToast';
-
-interface Module {
-  id: string;
-  name: string;
-  shortdescription: string;
-  description: string;
-  content: string;
-  studycredit: number;
-  location: string;
-  level: string;
-  learningoutcomes: string;
-}
+import type { Module } from '../types';
 
 const router = useRouter();
 const route = useRoute();
@@ -25,8 +14,7 @@ const loading = ref(true);
 const loadModule = async () => {
   try {
     loading.value = true;
-    const response = await api.get(`/api/modules/${route.params.id}`);
-    module.value = response.data;
+    module.value = await getModuleById(route.params.id as string);
   } catch (err: any) {
     showError(err?.response?.data?.message || 'Fout bij laden module');
     console.error(err);

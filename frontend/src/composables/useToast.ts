@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { TOAST_DURATION } from '../constants'
 
 // Type definitie voor een toast melding
 export interface Toast {
@@ -15,7 +16,7 @@ let toastIdCounter = 0
 // Composable voor toast meldingen
 export const useToast = () => {
   // Voeg nieuwe toast toe
-  const addToast = (message: string, type: Toast['type'] = 'info', duration = 4000) => {
+  const addToast = (message: string, type: Toast['type'] = 'success', duration: number = TOAST_DURATION.SUCCESS) => {
     const id = ++toastIdCounter
     const toast: Toast = {
       id,
@@ -45,17 +46,13 @@ export const useToast = () => {
   }
   
   // Shortcut functies voor verschillende types
-  const success = (message: string) => addToast(message, 'success', 5000)
-  const error = (message: string) => addToast(message, 'error', 7000)
-  const info = (message: string) => addToast(message, 'info', 4000)
-  const warning = (message: string) => addToast(message, 'warning', 6000)
+  const success = (message: string) => addToast(message, 'success', TOAST_DURATION.SUCCESS)
+  const error = (message: string) => addToast(message, 'error', TOAST_DURATION.ERROR)
   
   return {
     toasts,
     removeToast,
     success,
-    error,
-    info,
-    warning
+    error
   }
 }

@@ -197,14 +197,15 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '../services/api';
+import { createModule } from '../services/api';
 import { useToast } from '../composables/useToast';
+import type { CreateModuleData } from '../types';
 
 const router = useRouter();
 const { success: showSuccess, error: showError } = useToast();
 const isSubmitting = ref(false);
 
-const formData = reactive({
+const formData = reactive<CreateModuleData>({
   name: '',
   shortdescription: '',
   description: '',
@@ -247,7 +248,7 @@ const handleSubmit = async () => {
       ...formData
     };
     
-    await api.post('/api/modules', cleanedData);
+    await createModule(cleanedData);
     
     // Toon success melding en ga naar modules pagina
     showSuccess('Module succesvol aangemaakt!');

@@ -3,27 +3,28 @@ import { ModuleModel } from '../../infrastructure/models/ModuleModel';
 
 // Service voor alle module operaties
 export class ModuleService {
+    // Velden die verplicht zijn bij het aanmaken/updaten van modules
+    private readonly REQUIRED_FIELDS = [
+        { key: 'name', name: 'Module naam' },
+        { key: 'shortdescription', name: 'Korte beschrijving' },
+        { key: 'description', name: 'Beschrijving' },
+        { key: 'content', name: 'Inhoud' },
+        { key: 'location', name: 'Locatie' },
+        { key: 'level', name: 'Niveau' },
+        { key: 'learningoutcomes', name: 'Leeruitkomsten' }
+    ] as const;
+
     // Controleer of alle verplichte velden zijn ingevuld
     private validateModule(data: Partial<Module>, isUpdate = false): void {
-        const fields = [
-            { key: 'name', name: 'Module naam' },
-            { key: 'shortdescription', name: 'Korte beschrijving' },
-            { key: 'description', name: 'Beschrijving' },
-            { key: 'content', name: 'Inhoud' },
-            { key: 'location', name: 'Locatie' },
-            { key: 'level', name: 'Niveau' },
-            { key: 'learningoutcomes', name: 'Leeruitkomsten' }
-        ];
-
-        // Loop door alle velden en check of ze leeg zijn
-        for (const field of fields) {
+        // Valideer string velden
+        for (const field of this.REQUIRED_FIELDS) {
             const value = (data as any)[field.key];
             if ((!isUpdate && !value?.trim()) || (isUpdate && value !== undefined && !value.trim())) {
                 throw new Error(`${field.name} ${isUpdate ? 'kan niet leeg zijn' : 'is verplicht'}`);
             }
         }
 
-        // Check of studiecredits minimaal 1 is
+        // Valideer studiecredits
         if (data.studycredit !== undefined && data.studycredit < 1) {
             throw new Error('Studiecredits moeten minimaal 1 zijn');
         }
@@ -44,21 +45,21 @@ export class ModuleService {
         };
     }
 
+    // Verwijder extra spaties uit alle string velden
+    private cleanStringFields(data: any): any {
+        const cleanData: any = {};
+        Object.keys(data).forEach(key => {
+            const value = data[key];
+            cleanData[key] = typeof value === 'string' ? value.trim() : value;
+        });
+        return cleanData;
+    }
+
     // Maak nieuwe module aan
     async create(moduleData: Module): Promise<Module> {
         this.validateModule(moduleData);
-        
-        const module = await ModuleModel.create({
-            name: moduleData.name.trim(),
-            shortdescription: moduleData.shortdescription.trim(),
-            description: moduleData.description.trim(),
-            content: moduleData.content.trim(),
-            studycredit: moduleData.studycredit,
-            location: moduleData.location.trim(),
-            level: moduleData.level.trim(),
-            learningoutcomes: moduleData.learningoutcomes.trim()
-        });
-        
+        const cleanData = this.cleanStringFields(moduleData);
+        const module = await ModuleModel.create(cleanData);
         return this.mapToModule(module);
     }
 
@@ -77,21 +78,15 @@ export class ModuleService {
     // Update bestaande module
     async update(id: string, moduleData: Partial<Module>): Promise<Module | null> {
         this.validateModule(moduleData, true);
-
-        // Verwijder extra spaties uit alle velden
-        const cleanData: any = {};
-        Object.keys(moduleData).forEach(key => {
-            const value = (moduleData as any)[key];
-            cleanData[key] = typeof value === 'string' ? value.trim() : value;
-        });
-
+        const cleanData = this.cleanStringFields(moduleData);
         const module = await ModuleModel.findByIdAndUpdate(id, cleanData, { new: true });
         return module ? this.mapToModule(module) : null;
     }
 
     // Verwijder module
     async delete(id: string): Promise<boolean> {
-        return Boolean(await ModuleModel.findByIdAndDelete(id));
+        const result = await ModuleModel.findByIdAndDelete(id);
+        return Boolean(result);
     }
 
     // Haal alle unieke filter opties op (voor dropdown menus)

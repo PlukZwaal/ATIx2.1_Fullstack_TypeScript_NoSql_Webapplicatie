@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import api from '../services/api';
+import { getModuleById, updateModule } from '../services/api';
 import { useToast } from '../composables/useToast';
+import type { CreateModuleData } from '../types';
 
 const router = useRouter();
 const route = useRoute();
@@ -10,7 +11,7 @@ const { success: showSuccess, error: showError } = useToast();
 const loading = ref(true);
 const isSubmitting = ref(false);
 
-const formData = reactive({
+const formData = reactive<CreateModuleData>({
   name: '',
   shortdescription: '',
   description: '',
@@ -24,8 +25,7 @@ const formData = reactive({
 const loadModule = async () => {
   try {
     loading.value = true;
-    const response = await api.get(`/api/modules/${route.params.id}`);
-    const module = response.data;
+    const module = await getModuleById(route.params.id as string);
     
     // Vul formulier met bestaande data
     formData.name = module.name;
@@ -76,7 +76,7 @@ const handleSubmit = async () => {
       ...formData
     };
     
-    await api.put(`/api/modules/${route.params.id}`, cleanedData);
+    await updateModule(route.params.id as string, cleanedData);
     
     showSuccess('Module succesvol bijgewerkt!');
     

@@ -1,21 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import api, { toggleFavorite, getFavorites } from '../services/api';
+import { getModules, getFilterOptions, deleteModule as apiDeleteModule, toggleFavorite, getFavorites } from '../services/api';
 import { useToast } from '../composables/useToast';
-
-// Type definitie voor een module
-interface Module {
-  id: string;
-  name: string;
-  shortdescription: string;
-  description: string;
-  content: string;
-  studycredit: number;
-  location: string;
-  level: string;
-  learningoutcomes: string;
-}
+import type { Module, FilterOptions } from '../types';
+import { MODULES_PER_PAGE, SEARCH_DELAY_MS } from '../constants';
 
 const router = useRouter();
 const { success: showSuccess, error: showError } = useToast();
@@ -26,11 +15,7 @@ const loading = ref(true);
 const favorites = ref<string[]>([]);
 
 // Filter opties uit database
-const filterOptions = ref<{
-  locations: {value: string, count: number}[],
-  studyCredits: {value: number, count: number}[],
-  levels: {value: string, count: number}[]
-}>({
+const filterOptions = ref<FilterOptions>({
   locations: [],
   studyCredits: [],
   levels: []
@@ -52,20 +37,16 @@ const searchQuery = ref('');
 const showMenus = ref<{[key: string]: boolean}>({});
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// Hoeveel milliseconden wachten voordat zoeken start (na laatste toetsaanslag)
-const SEARCH_DELAY = 1000;
-
 // Paginering instellingen
 const currentPage = ref(1);
-const modulesPerPage = 25;
 const totalModules = ref(0);
 const allModules = ref<Module[]>([]);
 
 // Haal alle beschikbare filter opties op uit database
 const loadFilterOptions = async () => {
   try {
-    const response = await api.get('/api/modules/filter-options');
-    filterOptions.value = response.data;
+    const data = await getFilterOptions();
+    filterOptions.value = data;
   } catch (err) {
     console.error('Fout bij laden filter opties:', err);
   }
@@ -106,10 +87,8 @@ const loadModules = async () => {
     }
     
     const queryString = params.toString();
-    const url = queryString ? `/api/modules?${queryString}` : '/api/modules';
-    
-    const response = await api.get(url);
-    allModules.value = response.data;
+    const modules = await getModules(queryString ? params : undefined);
+    allModules.value = modules;
     totalModules.value = allModules.value.length;
     
     // Na nieuw zoeken altijd terug naar pagina 1
@@ -125,8 +104,8 @@ const loadModules = async () => {
 
 // Update welke modules zichtbaar zijn op huidige pagina
 const updateDisplayedModules = () => {
-  const startIndex = (currentPage.value - 1) * modulesPerPage;
-  const endIndex = startIndex + modulesPerPage;
+  const startIndex = (currentPage.value - 1) * MODULES_PER_PAGE;
+  const endIndex = startIndex + MODULES_PER_PAGE;
   modules.value = allModules.value.slice(startIndex, endIndex);
 };
 
@@ -239,7 +218,7 @@ const deleteModule = async (moduleId: string, event: Event) => {
   }
   
   try {
-    await api.delete(`/api/modules/${moduleId}`);
+    await apiDeleteModule(moduleId);
     loadModules();
     showSuccess('Module succesvol verwijderd!');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -288,11 +267,11 @@ const debouncedSearch = () => {
   }
   searchTimeout = setTimeout(() => {
     loadModules();
-  }, SEARCH_DELAY);
+  }, SEARCH_DELAY_MS);
 };
 
 // Bereken totaal aantal pagina's
-const totalPages = computed(() => Math.ceil(totalModules.value / modulesPerPage));
+const totalPages = computed(() => Math.ceil(totalModules.value / MODULES_PER_PAGE));
 
 // Ga naar specifieke pagina
 const goToPage = (page: number) => {

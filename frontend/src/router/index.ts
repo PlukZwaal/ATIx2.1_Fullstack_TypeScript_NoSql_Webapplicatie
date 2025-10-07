@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { STORAGE_KEYS } from '../constants'
 
 // Maak router aan met alle routes
 const router = createRouter({
@@ -56,7 +57,7 @@ const router = createRouter({
 
 // Controleer bij elke route of gebruiker toegang heeft
 router.beforeEach((to, _from, next) => {
-  const isAuthenticated = !!localStorage.getItem('token');
+  const isAuthenticated = !!localStorage.getItem(STORAGE_KEYS.TOKEN);
 
   // Route vereist login maar gebruiker is niet ingelogd
   if (to.meta.requiresAuth && !isAuthenticated) {

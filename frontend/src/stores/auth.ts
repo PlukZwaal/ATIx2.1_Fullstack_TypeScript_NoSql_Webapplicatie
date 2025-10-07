@@ -1,12 +1,7 @@
 import { defineStore } from 'pinia';
-import api from '../services/api';
-
-// Type definitie voor gebruiker
-interface User {
-    id: string;
-    name: string;
-    email: string;
-}
+import { login as apiLogin, register as apiRegister } from '../services/api';
+import type { User, LoginCredentials, RegisterData, AuthResponse } from '../types';
+import { STORAGE_KEYS } from '../constants';
 
 // State van de auth store
 interface AuthState {
@@ -14,22 +9,11 @@ interface AuthState {
     user: User | null;
 }
 
-// Type voor login gegevens
-interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-// Type voor registratie gegevens
-interface RegisterData extends LoginCredentials {
-    name: string;
-}
-
 // Auth store voor inloggen, registreren en uitloggen
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
-      token: localStorage.getItem('token'),
-      user: JSON.parse(localStorage.getItem('user') || 'null'),
+      token: localStorage.getItem(STORAGE_KEYS.TOKEN),
+      user: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER) || 'null'),
     }),
 
     getters: {
@@ -42,32 +26,32 @@ export const useAuthStore = defineStore('auth', {
         saveUserData(token: string, user: User) {
             this.token = token;
             this.user = user;
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
         },
 
         // Log gebruiker in
-        async login(credentials: LoginCredentials) {
+        async login(credentials: LoginCredentials): Promise<AuthResponse> {
             const normalizedEmail = credentials.email.trim().toLowerCase();
-            const response = await api.post('/api/auth/login', { ...credentials, email: normalizedEmail });
-            this.saveUserData(response.data.token, response.data.user);
-            return response.data;
+            const data = await apiLogin({ ...credentials, email: normalizedEmail });
+            this.saveUserData(data.token, data.user);
+            return data;
         },
 
         // Registreer nieuwe gebruiker
-        async register(data: RegisterData) {
+        async register(data: RegisterData): Promise<AuthResponse> {
             const normalizedEmail = data.email.trim().toLowerCase();
-            const response = await api.post('/api/auth/register', { ...data, email: normalizedEmail });
-            this.saveUserData(response.data.token, response.data.user);
-            return response.data;
+            const result = await apiRegister({ ...data, email: normalizedEmail });
+            this.saveUserData(result.token, result.user);
+            return result;
         },
 
         // Log gebruiker uit
         logout() {
             this.token = null;
             this.user = null;
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
         },
     },
 });
