@@ -30,16 +30,17 @@ jobs:
         run: |
           npm ci
           npm run build
-          # verwijder dev-only mapjes indien nodig
-          rm -rf node_modules
-          # laat alleen dist + package.json achter voor deploy
-          tar -czf ../backend-package.tar.gz dist package.json package-lock.json .env.example || true
+          mkdir deploy
+          cp package.json package-lock.json deploy/
+          cp -r dist deploy/
+          # optioneel voorbeeld env (geen echte secrets!)
+          if [ -f .env.example ]; then cp .env.example deploy/; fi
 
-      - name: Upload artifact
+      - name: Upload artifact (deploy folder)
         uses: actions/upload-artifact@v4
         with:
           name: backend-artifact
-          path: backend-package.tar.gz
+          path: backend/deploy
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,12 +54,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-artifact
-          path: .
-
-      - name: Extract package
-        run: |
-          mkdir backend
-          tar -xzf backend-artifact -C backend
+          path: backend
       
       - name: Login to Azure
         uses: azure/login@v2
