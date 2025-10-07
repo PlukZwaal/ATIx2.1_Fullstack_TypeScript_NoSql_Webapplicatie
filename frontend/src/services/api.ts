@@ -12,7 +12,7 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-const baseURL = import.meta.env.VITE_API_URL;
+const baseURL = import.meta.env.VITE_API_URL2;
 
 if (!baseURL) {
   // Optioneel: gooi een foutmelding als de variabele niet is ingesteld
