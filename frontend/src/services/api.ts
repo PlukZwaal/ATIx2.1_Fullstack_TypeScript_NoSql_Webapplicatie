@@ -16,7 +16,7 @@ const baseURL = import.meta.env.VITE_API_URL2;
 
 if (!baseURL) {
   // Optioneel: gooi een foutmelding als de variabele niet is ingesteld
-  console.error("Omgevingsvariabele VITE_API_URL is niet ingesteld!");
+  console.error("Omgevingsvariabele VITE_API_URL2 is niet ingesteld!");
   // Of stel een fallback in als dat nodig is
   // throw new Error("API URL missing!");
 }
