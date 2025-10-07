@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '../services/api';
+import api, { toggleFavorite, getFavorites } from '../services/api';
 import { useToast } from '../composables/useToast';
 
 interface Module {
@@ -20,6 +20,7 @@ const router = useRouter();
 const { success: showSuccess, error: showError } = useToast();
 const modules = ref<Module[]>([]);
 const loading = ref(true);
+const favorites = ref<string[]>([]); // Array van module IDs die favoriet zijn
 
 // Filter state
 const filterOptions = ref<{
@@ -118,11 +119,46 @@ const updateDisplayedModules = () => {
   modules.value = allModules.value.slice(startIndex, endIndex);
 };
 
+// Laad favorieten van de gebruiker
+const loadUserFavorites = async () => {
+  try {
+    const data = await getFavorites();
+    favorites.value = data.favorites || [];
+  } catch (err) {
+    console.error('Fout bij laden favorieten:', err);
+  }
+};
+
+// Toggle favorite (hartje aan/uit)
+const handleToggleFavorite = async (moduleId: string, event: Event) => {
+  event.stopPropagation(); // Voorkom dat module wordt geopend
+  
+  try {
+    const data = await toggleFavorite(moduleId);
+    favorites.value = data.favorites;
+    
+    if (data.isFavorite) {
+      showSuccess('❤️ Toegevoegd aan favorieten!');
+    } else {
+      showSuccess('Module verwijderd uit favorieten');
+    }
+  } catch (err: any) {
+    showError(err?.response?.data?.message || 'Fout bij bijwerken favoriet');
+  }
+};
+
+// Check of module favoriet is
+const isFavorite = (moduleId: string) => {
+  return favorites.value.includes(moduleId);
+};
+
 onMounted(async () => {
   // Laad filter opties eerst
   await loadFilterOptions();
   // Dan modules
   await loadModules();
+  // En favorieten
+  await loadUserFavorites();
   
   // Clean up query parameters zonder extra meldingen te tonen
   if (router.currentRoute.value.query.created === 'true') {
@@ -444,6 +480,25 @@ const clearFilters = () => {
                 </div>
                 
                 <div class="flex items-center gap-3">
+                  <!-- Hartje voor favorieten -->
+                  <button 
+                    @click="handleToggleFavorite(module.id, $event)"
+                    class="p-2 rounded-lg hover:bg-white/50 transition-all duration-200"
+                    :title="isFavorite(module.id) ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'"
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      class="h-6 w-6 transition-all duration-200"
+                      :class="isFavorite(module.id) ? 'text-red-500 fill-red-500' : 'text-slate-400 hover:text-red-400'"
+                      :fill="isFavorite(module.id) ? 'currentColor' : 'none'"
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
+                  
                   <!-- Dropdown menu -->
                   <div class="relative">
                     <button 

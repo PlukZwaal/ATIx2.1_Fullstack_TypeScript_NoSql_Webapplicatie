@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { AuthController } from './infrastructure/controllers/AuthController';
 import { ModuleController } from './infrastructure/controllers/ModuleController';
+import { UserController } from './infrastructure/controllers/UserController';
 import { authMiddleware } from './infrastructure/middleware/auth';
 
 const app = express();
@@ -25,6 +26,7 @@ mongoose
 
 const authController = new AuthController();
 const moduleController = new ModuleController();
+const userController = new UserController();
 
 app.post('/api/auth/register', authController.register);
 app.post('/api/auth/login', authController.login);
@@ -38,5 +40,9 @@ app.get('/api/modules/filter-options', authMiddleware, moduleController.getFilte
 app.get('/api/modules/:id', authMiddleware, moduleController.getById);
 app.put('/api/modules/:id', authMiddleware, moduleController.update);
 app.delete('/api/modules/:id', authMiddleware, moduleController.delete);
+
+// Favorieten routes
+app.post('/api/favorites/:moduleId', authMiddleware, userController.toggleFavorite);
+app.get('/api/favorites', authMiddleware, userController.getFavorites);
 
 app.listen(process.env.PORT, () => console.log(`Server draait op http://localhost:${process.env.PORT}`));

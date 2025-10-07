@@ -4,6 +4,7 @@ export interface User {
     name: string;
     email: string;
     password: string;
+    favorites?: string[]; // Array van module IDs
 }
 
 // Login gegevens interface
