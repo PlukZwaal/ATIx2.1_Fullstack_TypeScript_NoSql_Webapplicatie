@@ -14,6 +14,7 @@ import { STORAGE_KEYS } from '../constants';
 
 // Eén regel: pak direct de secret build-time variabele uit de omgeving
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL as string });
+console.log('API base URL:', import.meta.env.VITE_API_URL as string);
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
