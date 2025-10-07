@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Route definitie met lazy-loading voor componenten
+// Maak router aan met alle routes
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -54,18 +54,19 @@ const router = createRouter({
   ]
 })
 
-// Route beveiliging
+// Controleer bij elke route of gebruiker toegang heeft
 router.beforeEach((to, _from, next) => {
   const isAuthenticated = !!localStorage.getItem('token');
 
-  // Check voor beveiligde routes
+  // Route vereist login maar gebruiker is niet ingelogd
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login');
   }
-  // Check voor guest-only routes (login/register)
+  // Route is alleen voor niet-ingelogde gebruikers maar gebruiker is ingelogd
   else if (to.meta.requiresGuest && isAuthenticated) {
     next('/');
   }
+  // Gebruiker heeft toegang
   else {
     next();
   }

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import api, { toggleFavorite, getFavorites } from '../services/api';
 import { useToast } from '../composables/useToast';
 
+// Type definitie voor een module
 interface Module {
   id: string;
   name: string;
@@ -18,11 +19,13 @@ interface Module {
 
 const router = useRouter();
 const { success: showSuccess, error: showError } = useToast();
+
+// State variabelen
 const modules = ref<Module[]>([]);
 const loading = ref(true);
-const favorites = ref<string[]>([]); // Array van module IDs die favoriet zijn
+const favorites = ref<string[]>([]);
 
-// Filter state
+// Filter opties uit database
 const filterOptions = ref<{
   locations: {value: string, count: number}[],
   studyCredits: {value: number, count: number}[],
@@ -33,6 +36,7 @@ const filterOptions = ref<{
   levels: []
 });
 
+// Geselecteerde filters
 const selectedFilters = ref<{
   locations: string[],
   studyCredits: number[],
@@ -43,18 +47,21 @@ const selectedFilters = ref<{
   levels: []
 });
 
+// Zoeken en menu state
 const searchQuery = ref('');
 const showMenus = ref<{[key: string]: boolean}>({});
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// Configureerbare zoek delay (in milliseconden)
-const SEARCH_DELAY = 1000; // Je kunt dit aanpassen naar wat je wilt
+// Hoeveel milliseconden wachten voordat zoeken start (na laatste toetsaanslag)
+const SEARCH_DELAY = 1000;
 
-// Paginering
+// Paginering instellingen
 const currentPage = ref(1);
 const modulesPerPage = 25;
 const totalModules = ref(0);
 const allModules = ref<Module[]>([]);
+
+// Haal alle beschikbare filter opties op uit database
 const loadFilterOptions = async () => {
   try {
     const response = await api.get('/api/modules/filter-options');
@@ -64,30 +71,34 @@ const loadFilterOptions = async () => {
   }
 };
 
+// Laad modules van de server (met filters en zoeken)
 const loadModules = async () => {
   try {
     loading.value = true;
     
-    // Build query parameters
+    // Bouw URL met query parameters
     const params = new URLSearchParams();
     
-    // Add search query if exists
+    // Voeg zoekopdracht toe als ingevuld
     if (searchQuery.value.trim()) {
       params.append('search', searchQuery.value.trim());
     }
     
+    // Voeg locatie filters toe
     if (selectedFilters.value.locations.length > 0) {
       selectedFilters.value.locations.forEach(location => {
         params.append('locations', location);
       });
     }
     
+    // Voeg studiecredits filters toe
     if (selectedFilters.value.studyCredits.length > 0) {
       selectedFilters.value.studyCredits.forEach(credit => {
         params.append('studyCredits', credit.toString());
       });
     }
     
+    // Voeg niveau filters toe
     if (selectedFilters.value.levels.length > 0) {
       selectedFilters.value.levels.forEach(level => {
         params.append('levels', level);
@@ -101,7 +112,7 @@ const loadModules = async () => {
     allModules.value = response.data;
     totalModules.value = allModules.value.length;
     
-    // Reset naar pagina 1 bij nieuwe zoekactie/filter
+    // Na nieuw zoeken altijd terug naar pagina 1
     currentPage.value = 1;
     updateDisplayedModules();
   } catch (err) {
@@ -112,14 +123,14 @@ const loadModules = async () => {
   }
 };
 
-// Update displayed modules based on current page
+// Update welke modules zichtbaar zijn op huidige pagina
 const updateDisplayedModules = () => {
   const startIndex = (currentPage.value - 1) * modulesPerPage;
   const endIndex = startIndex + modulesPerPage;
   modules.value = allModules.value.slice(startIndex, endIndex);
 };
 
-// Laad favorieten van de gebruiker
+// Haal favorieten lijst op van ingelogde gebruiker
 const loadUserFavorites = async () => {
   try {
     const data = await getFavorites();
@@ -129,16 +140,16 @@ const loadUserFavorites = async () => {
   }
 };
 
-// Toggle favorite (hartje aan/uit)
+// Voeg module toe of verwijder uit favorieten
 const handleToggleFavorite = async (moduleId: string, event: Event) => {
-  event.stopPropagation(); // Voorkom dat module wordt geopend
+  event.stopPropagation();
   
   try {
     const data = await toggleFavorite(moduleId);
     favorites.value = data.favorites;
     
     if (data.isFavorite) {
-      showSuccess('❤️ Toegevoegd aan favorieten!');
+      showSuccess('Toegevoegd aan favorieten!');
     } else {
       showSuccess('Module verwijderd uit favorieten');
     }
@@ -147,33 +158,31 @@ const handleToggleFavorite = async (moduleId: string, event: Event) => {
   }
 };
 
-// Check of module favoriet is
+// Check of deze module favoriet is
 const isFavorite = (moduleId: string) => {
   return favorites.value.includes(moduleId);
 };
 
 onMounted(async () => {
-  // Laad filter opties eerst
+  // Laad eerst de filter opties
   await loadFilterOptions();
-  // Dan modules
+  // Dan de modules
   await loadModules();
-  // En favorieten
+  // En de favorieten
   await loadUserFavorites();
   
-  // Clean up query parameters zonder extra meldingen te tonen
+  // Check of er een "created" melding moet worden getoond
   if (router.currentRoute.value.query.created === 'true') {
-    // Verwijder de query parameter uit de URL (toast is al getoond in CreateModule)
     router.replace({ path: '/modules' });
   }
   
-  // Check voor delete melding
+  // Check of er een "deleted" melding moet worden getoond
   if (router.currentRoute.value.query.deleted === 'true') {
     showSuccess('Module succesvol verwijderd!');
-    // Verwijder de query parameter uit de URL
     router.replace({ path: '/modules' });
   }
   
-  // Close menus when clicking outside
+  // Sluit menu's als je ergens anders klikt
   const handleClickOutside = (event: Event) => {
     const target = event.target as HTMLElement;
     if (!target.closest('.relative')) {
@@ -189,16 +198,19 @@ onMounted(async () => {
   });
 });
 
+// Ga naar nieuwe module aanmaken pagina
 const goToCreate = () => {
   router.push('/modules/create');
 };
 
+// Open module detail pagina
 const viewModule = (moduleId: string) => {
   router.push(`/modules/${moduleId}`);
 };
 
+// Open of sluit menu voor module acties (edit/delete)
 const toggleMenu = (moduleId: string, event: Event) => {
-  event.stopPropagation(); // Voorkom dat de module wordt geopend
+  event.stopPropagation();
   showMenus.value[moduleId] = !showMenus.value[moduleId];
   
   // Sluit alle andere menu's
@@ -209,32 +221,34 @@ const toggleMenu = (moduleId: string, event: Event) => {
   });
 };
 
+// Ga naar module bewerken pagina
 const editModule = (moduleId: string, event: Event) => {
   event.stopPropagation();
   showMenus.value[moduleId] = false;
   router.push(`/modules/edit/${moduleId}`);
 };
 
+// Verwijder een module
 const deleteModule = async (moduleId: string, event: Event) => {
   event.stopPropagation();
   showMenus.value[moduleId] = false;
   
+  // Vraag bevestiging
   if (!confirm('Weet je zeker dat je deze module wilt verwijderen?')) {
     return;
   }
   
   try {
     await api.delete(`/api/modules/${moduleId}`);
-    // Herlaad modules
     loadModules();
     showSuccess('Module succesvol verwijderd!');
-    // Scroll naar bovenkant van pagina
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err: any) {
     showError(err?.response?.data?.message || 'Fout bij verwijderen module');
   }
 };
 
+// Toggle locatie filter aan/uit
 const toggleLocationFilter = (location: string) => {
   const index = selectedFilters.value.locations.indexOf(location);
   if (index > -1) {
@@ -245,6 +259,7 @@ const toggleLocationFilter = (location: string) => {
   loadModules();
 };
 
+// Toggle studiecredits filter aan/uit
 const toggleStudyCreditFilter = (studyCredit: number) => {
   const index = selectedFilters.value.studyCredits.indexOf(studyCredit);
   if (index > -1) {
@@ -255,6 +270,7 @@ const toggleStudyCreditFilter = (studyCredit: number) => {
   loadModules();
 };
 
+// Toggle niveau filter aan/uit
 const toggleLevelFilter = (level: string) => {
   const index = selectedFilters.value.levels.indexOf(level);
   if (index > -1) {
@@ -265,37 +281,38 @@ const toggleLevelFilter = (level: string) => {
   loadModules();
 };
 
-// Debounced search functie
+// Zoek met vertraging (wacht tot gebruiker stopt met typen)
 const debouncedSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
   searchTimeout = setTimeout(() => {
     loadModules();
-  }, SEARCH_DELAY); // Gebruikt de configureerbare delay
+  }, SEARCH_DELAY);
 };
 
-// Paginering functies
+// Bereken totaal aantal pagina's
 const totalPages = computed(() => Math.ceil(totalModules.value / modulesPerPage));
 
+// Ga naar specifieke pagina
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
     updateDisplayedModules();
-    // Scroll naar bovenkant van pagina
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };
 
+// Ga naar volgende pagina
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
     updateDisplayedModules();
-    // Scroll naar bovenkant van pagina
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };
 
+// Ga naar vorige pagina
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;

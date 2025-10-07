@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../../application/services/AuthService';
 
+// Controller voor registreren en inloggen
 export class AuthController {
     private authService = new AuthService();
 
+    // Nieuwe gebruiker registreren
     register = async (req: Request, res: Response) => {
         try {
             const result = await this.authService.register(req.body);
@@ -13,6 +15,7 @@ export class AuthController {
         }
     };
 
+    // Bestaande gebruiker inloggen
     login = async (req: Request, res: Response) => {
         try {
             const result = await this.authService.login(req.body);

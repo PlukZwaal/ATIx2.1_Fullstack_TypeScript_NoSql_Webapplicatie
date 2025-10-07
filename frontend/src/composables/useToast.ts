@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 
+// Type definitie voor een toast melding
 export interface Toast {
   id: number
   message: string
@@ -7,10 +8,13 @@ export interface Toast {
   duration?: number
 }
 
+// Lijst met alle actieve toasts
 const toasts = ref<Toast[]>([])
 let toastIdCounter = 0
 
+// Composable voor toast meldingen
 export const useToast = () => {
+  // Voeg nieuwe toast toe
   const addToast = (message: string, type: Toast['type'] = 'info', duration = 4000) => {
     const id = ++toastIdCounter
     const toast: Toast = {
@@ -22,6 +26,7 @@ export const useToast = () => {
     
     toasts.value.push(toast)
     
+    // Verwijder toast automatisch na duration
     if (duration > 0) {
       setTimeout(() => {
         removeToast(id)
@@ -31,6 +36,7 @@ export const useToast = () => {
     return id
   }
   
+  // Verwijder toast
   const removeToast = (id: number) => {
     const index = toasts.value.findIndex(toast => toast.id === id)
     if (index > -1) {
@@ -38,6 +44,7 @@ export const useToast = () => {
     }
   }
   
+  // Shortcut functies voor verschillende types
   const success = (message: string) => addToast(message, 'success', 5000)
   const error = (message: string) => addToast(message, 'error', 7000)
   const info = (message: string) => addToast(message, 'info', 4000)
