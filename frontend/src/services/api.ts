@@ -13,7 +13,7 @@ import type {
 import { STORAGE_KEYS } from '../constants';
 
 // Resolve base URL (fallback alleen bedoeld voor local dev)
-const resolvedBaseURL: string = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+const resolvedBaseURL: string = (import.meta as any).env?.VITE_API_URL;
 
 // Debug: expose en waarschuw in productie als localhost gebruikt wordt
 if (typeof window !== 'undefined') {

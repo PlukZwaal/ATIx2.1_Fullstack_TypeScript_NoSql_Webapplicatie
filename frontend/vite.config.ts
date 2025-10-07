@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   // Gebruik globalThis om Node types te vermijden (process bestaat in Node runtime)
   const cwd = (globalThis as any).process ? (globalThis as any).process.cwd() : '.';
   const env = loadEnv(mode, cwd, '');
-  const apiUrl = env.VITE_API_URL || 'http://localhost:4000';
+  const apiUrl = env.VITE_API_URL;
 
   return {
     plugins: [vue()],
