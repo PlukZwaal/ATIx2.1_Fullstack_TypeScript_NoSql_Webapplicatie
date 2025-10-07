@@ -12,24 +12,31 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-// Resolve base URL (fallback alleen bedoeld voor local dev)
-const resolvedBaseURL: string = (import.meta as any).env?.VITE_API_URL;
+// Bepaal API base URL met veilige fallback
+const PROD_BACKEND = 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net';
+let resolvedBaseURL: string | undefined = (import.meta as any).env?.VITE_API_URL;
 
-// Debug: expose en waarschuw in productie als localhost gebruikt wordt
-if (typeof window !== 'undefined') {
-  (window as any).__API_BASE__ = resolvedBaseURL;
-  if (import.meta.env.PROD && resolvedBaseURL.includes('localhost')) {
-    // Console warning zodat je direct ziet dat build fout is geconfigureerd
-    console.warn('[API] Production build gebruikt NOG localhost als baseURL:', resolvedBaseURL);
-  } else {
-    console.log('[API] Base URL =', resolvedBaseURL);
+if (import.meta.env.PROD) {
+  if (!resolvedBaseURL || resolvedBaseURL.trim() === '' || resolvedBaseURL.includes('localhost')) {
+    resolvedBaseURL = PROD_BACKEND;
+  }
+} else {
+  if (!resolvedBaseURL || resolvedBaseURL.trim() === '') {
+    resolvedBaseURL = 'http://localhost:4000';
   }
 }
 
+if (typeof window !== 'undefined') {
+  (window as any).__API_BASE__ = resolvedBaseURL;
+  console.log('[API] Base URL =', resolvedBaseURL);
+}
+
 // Maak axios instance met base URL
-const api = axios.create({
-  baseURL: resolvedBaseURL,
-});
+if (!resolvedBaseURL) {
+  throw new Error('Geen base URL beschikbaar voor API (zou nooit mogen gebeuren)');
+}
+
+const api = axios.create({ baseURL: resolvedBaseURL });
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
