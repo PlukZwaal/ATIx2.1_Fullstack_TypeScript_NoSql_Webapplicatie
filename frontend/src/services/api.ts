@@ -12,9 +12,9 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-// Eén regel: pak direct de secret build-time variabele uit de omgeving
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL as string });
-console.log('API base URL:', import.meta.env.VITE_API_URL as string);
+// TEMP: hardcoded base URL for debugging (remove after test)
+const api = axios.create({ baseURL: 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net' });
+console.log('API base URL (HARDCODED TEST):', 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net');
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
