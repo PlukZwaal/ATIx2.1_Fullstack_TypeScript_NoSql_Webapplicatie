@@ -12,9 +12,23 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
+// Resolve base URL (fallback alleen bedoeld voor local dev)
+const resolvedBaseURL: string = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+
+// Debug: expose en waarschuw in productie als localhost gebruikt wordt
+if (typeof window !== 'undefined') {
+  (window as any).__API_BASE__ = resolvedBaseURL;
+  if (import.meta.env.PROD && resolvedBaseURL.includes('localhost')) {
+    // Console warning zodat je direct ziet dat build fout is geconfigureerd
+    console.warn('[API] Production build gebruikt NOG localhost als baseURL:', resolvedBaseURL);
+  } else {
+    console.log('[API] Base URL =', resolvedBaseURL);
+  }
+}
+
 // Maak axios instance met base URL
 const api = axios.create({
-  baseURL: (import.meta as any).env.VITE_API_URL || 'http://localhost:4000',
+  baseURL: resolvedBaseURL,
 });
 
 // Voeg automatisch JWT token toe aan elke request
