@@ -12,31 +12,10 @@ import type {
 } from '../types';
 import { STORAGE_KEYS } from '../constants';
 
-// Bepaal API base URL met veilige fallback
-const PROD_BACKEND = 'https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net';
-let resolvedBaseURL: string | undefined = (import.meta as any).env?.VITE_API_URL;
-
-if (import.meta.env.PROD) {
-  if (!resolvedBaseURL || resolvedBaseURL.trim() === '' || resolvedBaseURL.includes('localhost')) {
-    resolvedBaseURL = PROD_BACKEND;
-  }
-} else {
-  if (!resolvedBaseURL || resolvedBaseURL.trim() === '') {
-    resolvedBaseURL = 'http://localhost:4000';
-  }
-}
-
-if (typeof window !== 'undefined') {
-  (window as any).__API_BASE__ = resolvedBaseURL;
-  console.log('[API] Base URL =', resolvedBaseURL);
-}
-
-// Maak axios instance met base URL
-if (!resolvedBaseURL) {
-  throw new Error('Geen base URL beschikbaar voor API (zou nooit mogen gebeuren)');
-}
-
-const api = axios.create({ baseURL: resolvedBaseURL });
+// Gebruik uitsluitend de env variabele (moet gezet zijn bij build). Geen fallbacks.
+const api = axios.create({
+  baseURL: (import.meta as any).env?.VITE_API_URL,
+});
 
 // Voeg automatisch JWT token toe aan elke request
 api.interceptors.request.use((config) => {
