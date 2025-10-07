@@ -14,33 +14,23 @@ import { authMiddleware } from './infrastructure/middleware/auth';
 
 const app = express();
 
-// Validatie verplichte environment variabelen (PORT is optioneel: Azure levert die zelf aan)
-const missing: string[] = [];
-if (!process.env.MONGODB_URI) missing.push('MONGODB_URI');
-if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
-
-let dbConnected = false;
-
-if (missing.length) {
-    console.error('Ontbrekende environment variabelen (server start in degraded mode):', missing.join(', '));
-} else {
-    // Verbind met MongoDB database alleen als alles aanwezig is
-    mongoose
-        .connect(process.env.MONGODB_URI!)
-        .then(() => {
-            dbConnected = true;
-            console.log('MongoDB verbonden');
-        })
-        .catch(err => {
-            console.error('MongoDB verbindingsfout (server blijft draaien):', err);
-        });
-}
+// Check of alle verplichte environment variabelen aanwezig zijn
+if (!process.env.PORT) throw new Error('PORT ontbreekt in .env');
+if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI ontbreekt in .env');
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET ontbreekt in .env');
 
 // Middleware om JSON te accepteren en CORS toe te staan
 app.use(cors());
 app.use(express.json());
 
-// (Database connect verplaatst naar boven zodat we niet hard stoppen bij fouten)
+// Verbind met MongoDB database
+mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB verbonden'))
+    .catch(err => {
+        console.error('MongoDB verbindingsfout:', err);
+        process.exit(1); // Stop de server als database niet bereikbaar is
+    });
 
 // Maak controllers aan
 const authController = new AuthController();
@@ -63,21 +53,6 @@ app.delete('/api/modules/:id', authMiddleware, moduleController.delete);
 // Favorieten routes (login verplicht)
 app.post('/api/favorites/:moduleId', authMiddleware, userController.toggleFavorite);
 app.get('/api/favorites', authMiddleware, userController.getFavorites);
-
-// Root & health endpoints
-app.get('/', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', service: 'backend', time: new Date().toISOString() });
-});
-app.get('/health', (_req: Request, res: Response) => {
-    const status = missing.length === 0 && dbConnected;
-    res.status(status ? 200 : 503).json({
-        healthy: status,
-        dbConnected,
-        missingEnv: missing,
-        uptime: process.uptime(),
-        timestamp: Date.now()
-    });
-});
 
 // 404 handler - alle routes die niet bestaan
 app.use((_req: Request, res: Response) => {
