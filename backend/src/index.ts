@@ -14,10 +14,14 @@ import { authMiddleware } from './infrastructure/middleware/auth';
 
 const app = express();
 
-// Check of alle verplichte environment variabelen aanwezig zijn
-if (!process.env.PORT) throw new Error('PORT ontbreekt in .env');
-if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI ontbreekt in .env');
-if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET ontbreekt in .env');
+// Validatie verplichte environment variabelen (PORT is optioneel: Azure levert die zelf aan)
+const missing: string[] = [];
+if (!process.env.MONGODB_URI) missing.push('MONGODB_URI');
+if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+if (missing.length) {
+    console.error('Ontbrekende environment variabelen:', missing.join(', '));
+    process.exit(1);
+}
 
 // Middleware om JSON te accepteren en CORS toe te staan
 app.use(cors());
@@ -25,7 +29,7 @@ app.use(express.json());
 
 // Verbind met MongoDB database
 mongoose
-    .connect(process.env.MONGODB_URI)
+    .connect(process.env.MONGODB_URI!)
     .then(() => console.log('MongoDB verbonden'))
     .catch(err => {
         console.error('MongoDB verbindingsfout:', err);
@@ -53,6 +57,14 @@ app.delete('/api/modules/:id', authMiddleware, moduleController.delete);
 // Favorieten routes (login verplicht)
 app.post('/api/favorites/:moduleId', authMiddleware, userController.toggleFavorite);
 app.get('/api/favorites', authMiddleware, userController.getFavorites);
+
+// Root & health endpoints
+app.get('/', (_req: Request, res: Response) => {
+    res.json({ status: 'ok', service: 'backend', time: new Date().toISOString() });
+});
+app.get('/health', (_req: Request, res: Response) => {
+    res.status(200).json({ healthy: true, uptime: process.uptime(), timestamp: Date.now() });
+});
 
 // 404 handler - alle routes die niet bestaan
 app.use((_req: Request, res: Response) => {
