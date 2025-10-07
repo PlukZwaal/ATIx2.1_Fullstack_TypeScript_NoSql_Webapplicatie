@@ -1,15 +1,22 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig, loadEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
+// Gebruik een function zodat we de juiste mode (development/production) env kunnen laden
+export default defineConfig(({ mode }) => {
+  // Gebruik globalThis om Node types te vermijden (process bestaat in Node runtime)
+  const cwd = (globalThis as any).process ? (globalThis as any).process.cwd() : '.';
+  const env = loadEnv(mode, cwd, '');
+  const apiUrl = env.VITE_API_URL || 'http://localhost:4000';
+
+  return {
+    plugins: [vue()],
+    server: {
+      proxy: {
+        '/api': {
+          target: apiUrl,
+          changeOrigin: true,
+        },
       },
     },
-  },
-})
+  };
+});
