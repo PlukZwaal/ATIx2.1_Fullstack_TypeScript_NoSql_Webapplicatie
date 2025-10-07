@@ -85,7 +85,7 @@ app.get('/api/health', (_req, res) => {
         },
         env: { jwtSecretPresent: Boolean(process.env.JWT_SECRET) }
     });
-});
+}); 
 
 // 404 handler - alle routes die niet bestaan
 app.use((_req: Request, res: Response) => {
