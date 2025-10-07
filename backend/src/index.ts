@@ -26,9 +26,9 @@ app.use(express.json());
 // Verbind met MongoDB database
 mongoose
     .connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ MongoDB verbonden'))
+    .then(() => console.log('MongoDB verbonden'))
     .catch(err => {
-        console.error('❌ MongoDB verbindingsfout:', err);
+        console.error('MongoDB verbindingsfout:', err);
         process.exit(1); // Stop de server als database niet bereikbaar is
     });
 
@@ -61,10 +61,10 @@ app.use((_req: Request, res: Response) => {
 
 // Globale error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error('❌ Server error:', err);
+    console.error('Server error:', err);
     res.status(500).json({ message: 'Er is iets misgegaan op de server' });
 });
 
 // Start de server
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server draait op http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server draait op http://localhost:${PORT}`));
