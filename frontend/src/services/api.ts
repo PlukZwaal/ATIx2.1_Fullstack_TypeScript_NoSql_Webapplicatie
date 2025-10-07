@@ -13,7 +13,7 @@ import type {
 import { STORAGE_KEYS } from '../constants';
 
 // Resolve base URL (fallback alleen bedoeld voor local dev)
-const resolvedBaseURL: string = "https://lu1backend-csfsfge9c7bkcjdb.canadacentral-01.azurewebsites.net";
+const resolvedBaseURL: string = (import.meta as any).env?.VITE_API_URL;
 
 // Debug: expose en waarschuw in productie als localhost gebruikt wordt
 if (typeof window !== 'undefined') {
