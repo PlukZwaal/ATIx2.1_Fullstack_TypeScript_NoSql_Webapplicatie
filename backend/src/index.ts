@@ -10,6 +10,7 @@ import cors from 'cors';
 import { AuthController } from './infrastructure/controllers/AuthController';
 import { ModuleController } from './infrastructure/controllers/ModuleController';
 import { UserController } from './infrastructure/controllers/UserController';
+import { CommentController } from './infrastructure/controllers/CommentController';
 import { authMiddleware } from './infrastructure/middleware/auth';
 
 const app = express();
@@ -53,6 +54,7 @@ const requireDb: import('express').RequestHandler = (_req, res, next) => {
 const authController = new AuthController();
 const moduleController = new ModuleController();
 const userController = new UserController();
+const commentController = new CommentController();
 
 // Publieke routes (geen login nodig)
 app.post('/api/auth/register', authController.register);
@@ -70,6 +72,11 @@ app.delete('/api/modules/:id', authMiddleware, requireDb, moduleController.delet
 // Favorieten routes (login verplicht)
 app.post('/api/favorites/:moduleId', authMiddleware, requireDb, userController.toggleFavorite);
 app.get('/api/favorites', authMiddleware, requireDb, userController.getFavorites);
+
+// Comment routes (login verplicht)
+app.post('/api/comments', authMiddleware, requireDb, commentController.create);
+app.get('/api/comments/:moduleId', authMiddleware, requireDb, commentController.getByModuleId);
+app.delete('/api/comments/:id', authMiddleware, requireDb, commentController.delete);
 
 // Health endpoint
 app.get('/api/health', (_req, res) => {

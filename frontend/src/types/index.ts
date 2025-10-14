@@ -49,6 +49,21 @@ export interface FilterOptions {
   levels: { value: string; count: number }[];
 }
 
+// Comment types
+export interface Comment {
+  id: string;
+  moduleId: string;
+  userId: string;
+  userName: string;
+  description: string;
+  createdAt: string;
+}
+
+export type CreateCommentData = Omit<Comment, 'id' | 'createdAt' | 'userId' | 'userName'> & {
+  moduleId: string;
+  description: string;
+};
+
 // Favorites types
 export interface FavoritesResponse {
   favorites: string[];

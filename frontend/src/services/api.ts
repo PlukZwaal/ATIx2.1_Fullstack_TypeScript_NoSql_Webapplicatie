@@ -7,6 +7,8 @@ import type {
   CreateModuleData,
   UpdateModuleData,
   FilterOptions,
+  Comment,
+  CreateCommentData,
   FavoritesResponse,
   ToggleFavoriteResponse
 } from '../types';
@@ -88,6 +90,25 @@ export const toggleFavorite = async (moduleId: string): Promise<ToggleFavoriteRe
 export const getFavorites = async (): Promise<FavoritesResponse> => {
   const response = await api.get<FavoritesResponse>('/api/favorites');
   return response.data;
+};
+
+// ==================== COMMENTS API ====================
+
+// Maak nieuwe comment aan
+export const createComment = async (data: CreateCommentData): Promise<Comment> => {
+  const response = await api.post<Comment>('/api/comments', data);
+  return response.data;
+};
+
+// Haal alle comments voor een module op
+export const getCommentsByModuleId = async (moduleId: string): Promise<Comment[]> => {
+  const response = await api.get<Comment[]>(`/api/comments/${moduleId}`);
+  return response.data;
+};
+
+// Verwijder comment
+export const deleteComment = async (id: string): Promise<void> => {
+  await api.delete(`/api/comments/${id}`);
 };
 
 export default api;

@@ -82,6 +82,6 @@ export class AuthService {
 
     // Maak JWT token aan (geldig voor 24 uur)
     private generateToken(user: User): string {
-        return jwt.sign({ sub: user.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+        return jwt.sign({ sub: user.id, name: user.name }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
     }
 }

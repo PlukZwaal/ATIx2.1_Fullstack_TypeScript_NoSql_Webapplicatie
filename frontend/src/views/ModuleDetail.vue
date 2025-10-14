@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { getModuleById } from '../services/api';
+import { getModuleById, getCommentsByModuleId, createComment } from '../services/api';
 import { useToast } from '../composables/useToast';
-import type { Module } from '../types';
+import { useAuthStore } from '../stores/auth';
+import type { Module, Comment, CreateCommentData } from '../types';
 
 const router = useRouter();
 const route = useRoute();
-const { error: showError } = useToast();
+const { error: showError, success: showSuccess } = useToast();
+const authStore = useAuthStore();
 const module = ref<Module | null>(null);
+const comments = ref<Comment[]>([]);
 const loading = ref(true);
+const commentsLoading = ref(false);
+const newComment = ref('');
+const submittingComment = ref(false);
 
 const loadModule = async () => {
   try {
@@ -23,6 +29,39 @@ const loadModule = async () => {
   }
 };
 
+const loadComments = async () => {
+  try {
+    commentsLoading.value = true;
+    comments.value = await getCommentsByModuleId(route.params.id as string);
+  } catch (err: any) {
+    showError(err?.response?.data?.message || 'Fout bij laden comments');
+    console.error(err);
+  } finally {
+    commentsLoading.value = false;
+  }
+};
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) return;
+
+  try {
+    submittingComment.value = true;
+    const commentData = {
+      moduleId: route.params.id as string,
+      description: newComment.value.trim()
+    };
+    await createComment(commentData as CreateCommentData);
+    newComment.value = '';
+    showSuccess('Comment toegevoegd!');
+    await loadComments(); // Herlaad comments
+  } catch (err: any) {
+    showError(err?.response?.data?.message || 'Fout bij toevoegen comment');
+    console.error(err);
+  } finally {
+    submittingComment.value = false;
+  }
+};
+
 
 
 const goBack = () => {
@@ -31,6 +70,7 @@ const goBack = () => {
 
 onMounted(() => {
   loadModule();
+  loadComments();
   
   // Check voor update melding
   if (router.currentRoute.value.query.updated === 'true') {
@@ -146,6 +186,78 @@ onMounted(() => {
               <div class="bg-slate-50 rounded-xl p-6">
                 <div class="text-slate-700 leading-relaxed whitespace-pre-line">{{ module?.learningoutcomes }}</div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comments sectie -->
+        <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">Comments</h2>
+          </div>
+
+          <!-- Nieuwe comment toevoegen -->
+          <div v-if="authStore.isAuthenticated" class="mb-6">
+            <textarea
+              v-model="newComment"
+              placeholder="Schrijf een comment..."
+              class="w-full p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              rows="3"
+            ></textarea>
+            <button
+              @click="submitComment"
+              :disabled="!newComment.trim() || submittingComment"
+              class="mt-3 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <span v-if="submittingComment">Bezig met plaatsen...</span>
+              <span v-else>Comment plaatsen</span>
+            </button>
+          </div>
+
+          <!-- Login prompt -->
+          <div v-else class="mb-6 p-4 bg-slate-50 rounded-xl text-center">
+            <p class="text-slate-600 mb-2">Log in om een comment te plaatsen</p>
+            <router-link
+              to="/login"
+              class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+            >
+              Inloggen
+            </router-link>
+          </div>
+
+          <!-- Comments lijst -->
+          <div v-if="commentsLoading" class="text-center py-8">
+            <div class="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full animate-pulse">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <p class="text-slate-600 mt-2">Comments laden...</p>
+          </div>
+
+          <div v-else-if="comments.length === 0" class="text-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <p class="text-slate-500">Nog geen comments. Wees de eerste!</p>
+          </div>
+
+          <div v-else class="space-y-4">
+            <div
+              v-for="comment in comments"
+              :key="comment.id"
+              class="bg-slate-50 rounded-xl p-4"
+            >
+              <div class="mb-2">
+                <h4 class="font-semibold text-slate-800">{{ comment.userName }}</h4>
+              </div>
+              <p class="text-slate-700 mb-2">{{ comment.description }}</p>
+              <p class="text-xs text-slate-500">{{ new Date(comment.createdAt).toLocaleString('nl-NL') }}</p>
             </div>
           </div>
         </div>

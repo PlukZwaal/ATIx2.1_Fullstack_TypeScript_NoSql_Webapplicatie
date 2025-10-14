@@ -48,8 +48,13 @@ const router = useRouter();
             </div>
             
             <div>
-              <h3 class="font-bold mb-2">4. Zoeken & Paginering</h3>
-              <p class="text-slate-600">Zoeken in modules met paginering (20 per pagina)</p>
+              <h3 class="font-bold mb-2">4. Filters</h3>
+              <p class="text-slate-600">Zoeken in modules met filters</p>
+            </div>
+            
+            <div>
+              <h3 class="font-bold mb-2">5. Comments Systeem</h3>
+              <p class="text-slate-600">Laat comments achter onder modules voor discussie en feedback</p>
             </div>
           </div>
         </div>
