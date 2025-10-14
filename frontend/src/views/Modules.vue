@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getModules, getFilterOptions, deleteModule as apiDeleteModule, toggleFavorite, getFavorites } from '../services/api';
 import { useToast } from '../composables/useToast';
 import type { Module, FilterOptions } from '../types';
-import { MODULES_PER_PAGE, SEARCH_DELAY_MS } from '../constants';
+import { SEARCH_DELAY_MS } from '../constants';
 
 const router = useRouter();
 const { success: showSuccess, error: showError } = useToast();
@@ -36,11 +36,6 @@ const selectedFilters = ref<{
 const searchQuery = ref('');
 const showMenus = ref<{[key: string]: boolean}>({});
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-
-// Paginering instellingen
-const currentPage = ref(1);
-const totalModules = ref(0);
-const allModules = ref<Module[]>([]);
 
 // Haal alle beschikbare filter opties op uit database
 const loadFilterOptions = async () => {
@@ -87,26 +82,13 @@ const loadModules = async () => {
     }
     
     const queryString = params.toString();
-    const modules = await getModules(queryString ? params : undefined);
-    allModules.value = modules;
-    totalModules.value = allModules.value.length;
-    
-    // Na nieuw zoeken altijd terug naar pagina 1
-    currentPage.value = 1;
-    updateDisplayedModules();
+    modules.value = await getModules(queryString ? params : undefined);
   } catch (err) {
     showError('Fout bij laden modules');
     console.error(err);
   } finally {
     loading.value = false;
   }
-};
-
-// Update welke modules zichtbaar zijn op huidige pagina
-const updateDisplayedModules = () => {
-  const startIndex = (currentPage.value - 1) * MODULES_PER_PAGE;
-  const endIndex = startIndex + MODULES_PER_PAGE;
-  modules.value = allModules.value.slice(startIndex, endIndex);
 };
 
 // Haal favorieten lijst op van ingelogde gebruiker
@@ -267,37 +249,6 @@ const debouncedSearch = () => {
   searchTimeout = setTimeout(() => {
     loadModules();
   }, SEARCH_DELAY_MS);
-};
-
-// Bereken totaal aantal pagina's
-const totalPages = computed(() => Math.ceil(totalModules.value / MODULES_PER_PAGE));
-
-// Ga naar specifieke pagina
-const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    updateDisplayedModules();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
-
-// Ga naar volgende pagina
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    updateDisplayedModules();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
-
-// Ga naar vorige pagina
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    updateDisplayedModules();
-    // Scroll naar bovenkant van pagina
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 };
 
 const clearFilters = () => {
@@ -555,44 +506,6 @@ const clearFilters = () => {
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Paginering -->
-        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
-          <div class="flex items-center gap-2">
-            <!-- Vorige pagina knop -->
-            <button 
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'"
-              class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors"
-            >
-              ←
-            </button>
-
-            <!-- Pagina nummers -->
-            <template v-for="page in totalPages" :key="page">
-              <button 
-                v-if="page <= 5 || (totalPages > 5 && page === totalPages)"
-                @click="goToPage(page)"
-                :class="currentPage === page ? 'bg-red-500 text-white' : 'bg-white text-slate-700 hover:bg-red-100'"
-                class="px-3 py-2 rounded-lg border border-slate-200 transition-colors min-w-[40px]"
-              >
-                {{ page }}
-              </button>
-              <span v-if="totalPages > 5 && page === 5 && totalPages > 6" class="px-2 text-slate-500">...</span>
-            </template>
-
-            <!-- Volgende pagina knop -->
-            <button 
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-              :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'"
-              class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors"
-            >
-              →
-            </button>
           </div>
         </div>
       </div>
