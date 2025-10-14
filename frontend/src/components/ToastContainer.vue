@@ -101,7 +101,7 @@ const getTextClasses = (type: string) => {
       return 'text-amber-800'
     default:
       return 'text-blue-800'
-  }
+  } 
 }
 
 /**
