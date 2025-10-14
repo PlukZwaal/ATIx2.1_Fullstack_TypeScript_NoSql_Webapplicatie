@@ -25,7 +25,7 @@ let dbConnected = false;
 
 // Middleware om JSON te accepteren en CORS toe te staan
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
 // Verbind met MongoDB (niet fataal bij fout zodat health endpoint blijft werken)
 if (HAS_MONGODB_URI) {
