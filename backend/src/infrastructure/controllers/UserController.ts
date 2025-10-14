@@ -2,9 +2,18 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { UserModel } from '../models/UserModel';
 
-// Controller voor favorieten functionaliteit
+/**
+ * Controller voor gebruikersgerelateerde operaties
+ * Beheert HTTP requests voor favorieten functionaliteit
+ */
 export class UserController {
-    // Voeg module toe of verwijder uit favorieten
+    /**
+     * Voegt een module toe aan of verwijdert deze uit favorieten
+     * POST /api/users/favorites/:moduleId
+     * @param {AuthRequest} req - Express request object met geauthenticeerde user ID en module ID in params
+     * @param {Response} res - Express response object
+     * @returns {Promise<void>} JSON response met favoriet status en lijst of error
+     */
     toggleFavorite = async (req: AuthRequest, res: Response) => {
         try {
             const userId = req.userId;
@@ -54,7 +63,13 @@ export class UserController {
         }
     };
 
-    // Haal lijst met favorieten op
+    /**
+     * Haalt de lijst met favoriete modules van de ingelogde gebruiker op
+     * GET /api/users/favorites
+     * @param {AuthRequest} req - Express request object met geauthenticeerde user ID
+     * @param {Response} res - Express response object
+     * @returns {Promise<void>} JSON response met array van favoriete module IDs of error
+     */
     getFavorites = async (req: AuthRequest, res: Response) => {
         try {
             const userId = req.userId;

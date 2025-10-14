@@ -22,6 +22,10 @@ const formData = reactive<CreateModuleData>({
   learningoutcomes: ''
 });
 
+/**
+ * Laadt een bestaande module voor bewerking
+ * Haalt module data op van de server en vult het formulier
+ */
 const loadModule = async () => {
   try {
     loading.value = true;
@@ -46,6 +50,11 @@ const loadModule = async () => {
 
 // Deze functies zijn niet meer nodig omdat we nu een string gebruiken
 
+/**
+ * Valideert het module bewerkingsformulier
+ * Controleert alle verplichte velden en datatypes
+ * @returns {string | null} Null als formulier geldig is, anders foutmelding
+ */
 const validateForm = (): string | null => {
   if (!formData.name.trim()) return 'Naam is verplicht';
   if (!formData.shortdescription.trim()) return 'Korte beschrijving is verplicht';
@@ -59,6 +68,11 @@ const validateForm = (): string | null => {
   return null;
 };
 
+/**
+ * Handelt de module update submit af
+ * Valideert formulier, werkt module bij en navigeert naar modules overzicht bij succes
+ * Toont foutmeldingen bij validatie of update fouten
+ */
 const handleSubmit = async () => {
   if (isSubmitting.value) return;
   
@@ -100,7 +114,6 @@ onMounted(() => {
 <template>
   <div class="min-h-screen py-8 px-6">
     <div class="container mx-auto max-w-4xl">
-      <!-- Loading state -->
       <div v-if="loading" class="text-center py-16">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-6 animate-pulse">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,9 +123,7 @@ onMounted(() => {
         <p class="text-slate-600 text-xl">Module wordt geladen...</p>
       </div>
 
-      <!-- Form content -->
       <div v-else-if="formData.name">
-        <!-- Header -->
         <div class="mb-8">
           <div class="flex items-center gap-4 mb-4">
             <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-rose-500 rounded-xl flex items-center justify-center">
@@ -127,10 +138,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Form -->
         <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-xl">
           <form @submit.prevent="handleSubmit" class="space-y-8">
-            <!-- Basis informatie sectie -->
             <div class="space-y-6">
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -223,7 +232,6 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Leeruitkomsten sectie -->
             <div class="space-y-6">
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -249,7 +257,6 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Submit knoppen -->
             <div class="flex flex-col sm:flex-row gap-4 pt-8">
               <button 
                 type="submit" 
@@ -275,8 +282,6 @@ onMounted(() => {
                 Annuleren
               </router-link>
             </div>
-          
-            <!-- Feedback berichten -->
 
           </form>
         </div>

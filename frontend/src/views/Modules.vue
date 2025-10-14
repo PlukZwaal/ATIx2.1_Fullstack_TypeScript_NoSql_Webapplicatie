@@ -47,7 +47,10 @@ const loadFilterOptions = async () => {
   }
 };
 
-// Laad modules van de server (met filters en zoeken)
+/**
+ * Laadt modules van de server met huidige filters en zoekopdracht
+ * Bouwt query parameters op basis van geselecteerde filters en zoekterm
+ */
 const loadModules = async () => {
   try {
     loading.value = true;
@@ -91,7 +94,9 @@ const loadModules = async () => {
   }
 };
 
-// Haal favorieten lijst op van ingelogde gebruiker
+/**
+ * Haalt favorieten lijst op van ingelogde gebruiker
+ */
 const loadUserFavorites = async () => {
   try {
     const data = await getFavorites();
@@ -101,7 +106,11 @@ const loadUserFavorites = async () => {
   }
 };
 
-// Voeg module toe of verwijder uit favorieten
+/**
+ * Voegt module toe aan of verwijdert uit favorieten
+ * @param {string} moduleId - ID van de module
+ * @param {Event} event - Click event om propagatie te stoppen
+ */
 const handleToggleFavorite = async (moduleId: string, event: Event) => {
   event.stopPropagation();
   
@@ -119,7 +128,11 @@ const handleToggleFavorite = async (moduleId: string, event: Event) => {
   }
 };
 
-// Check of deze module favoriet is
+/**
+ * Controleert of een module in de favorieten lijst staat
+ * @param {string} moduleId - ID van de module om te controleren
+ * @returns {boolean} True als module favoriet is
+ */
 const isFavorite = (moduleId: string) => {
   return favorites.value.includes(moduleId);
 };
@@ -164,12 +177,19 @@ const goToCreate = () => {
   router.push('/modules/create');
 };
 
-// Open module detail pagina
+/**
+ * Navigeert naar de detail pagina van een module
+ * @param {string} moduleId - ID van de module om te bekijken
+ */
 const viewModule = (moduleId: string) => {
   router.push(`/modules/${moduleId}`);
 };
 
-// Open of sluit menu voor module acties (edit/delete)
+/**
+ * Opent of sluit het actie menu voor een module (bewerken/verwijderen)
+ * @param {string} moduleId - ID van de module
+ * @param {Event} event - Click event om propagatie te stoppen
+ */
 const toggleMenu = (moduleId: string, event: Event) => {
   event.stopPropagation();
   showMenus.value[moduleId] = !showMenus.value[moduleId];
@@ -182,14 +202,23 @@ const toggleMenu = (moduleId: string, event: Event) => {
   });
 };
 
-// Ga naar module bewerken pagina
+/**
+ * Navigeert naar de bewerk pagina van een module
+ * @param {string} moduleId - ID van de module om te bewerken
+ * @param {Event} event - Click event om propagatie te stoppen
+ */
 const editModule = (moduleId: string, event: Event) => {
   event.stopPropagation();
   showMenus.value[moduleId] = false;
   router.push(`/modules/edit/${moduleId}`);
 };
 
-// Verwijder een module
+/**
+ * Verwijdert een module na bevestiging
+ * Vraagt om bevestiging voordat de module wordt verwijderd
+ * @param {string} moduleId - ID van de module om te verwijderen
+ * @param {Event} event - Click event om propagatie te stoppen
+ */
 const deleteModule = async (moduleId: string, event: Event) => {
   event.stopPropagation();
   showMenus.value[moduleId] = false;
@@ -208,7 +237,10 @@ const deleteModule = async (moduleId: string, event: Event) => {
   }
 };
 
-// Toggle locatie filter aan/uit
+/**
+ * Schakelt een locatie filter aan of uit
+ * @param {string} location - Locatie om te filteren
+ */
 const toggleLocationFilter = (location: string) => {
   const index = selectedFilters.value.locations.indexOf(location);
   if (index > -1) {
@@ -219,7 +251,10 @@ const toggleLocationFilter = (location: string) => {
   loadModules();
 };
 
-// Toggle studiecredits filter aan/uit
+/**
+ * Schakelt een studiecredits filter aan of uit
+ * @param {number} studyCredit - Aantal studiecredits om te filteren
+ */
 const toggleStudyCreditFilter = (studyCredit: number) => {
   const index = selectedFilters.value.studyCredits.indexOf(studyCredit);
   if (index > -1) {
@@ -230,7 +265,10 @@ const toggleStudyCreditFilter = (studyCredit: number) => {
   loadModules();
 };
 
-// Toggle niveau filter aan/uit
+/**
+ * Schakelt een niveau filter aan of uit
+ * @param {string} level - Niveau om te filteren
+ */
 const toggleLevelFilter = (level: string) => {
   const index = selectedFilters.value.levels.indexOf(level);
   if (index > -1) {
@@ -241,7 +279,10 @@ const toggleLevelFilter = (level: string) => {
   loadModules();
 };
 
-// Zoek met vertraging (wacht tot gebruiker stopt met typen)
+/**
+ * Voert een vertraagde zoekopdracht uit
+ * Wacht tot gebruiker stopt met typen voordat zoekopdracht wordt uitgevoerd
+ */
 const debouncedSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
@@ -251,6 +292,9 @@ const debouncedSearch = () => {
   }, SEARCH_DELAY_MS);
 };
 
+/**
+ * Wist alle geselecteerde filters en herlaadt modules
+ */
 const clearFilters = () => {
   selectedFilters.value.locations = [];
   selectedFilters.value.studyCredits = [];
@@ -262,7 +306,6 @@ const clearFilters = () => {
 <template>
   <div class="min-h-screen py-8 px-6">
     <div class="container mx-auto max-w-7xl">
-      <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 class="text-4xl font-bold text-slate-800 mb-2">Modules</h1>
@@ -283,22 +326,19 @@ const clearFilters = () => {
 
 
 
-      <!-- Grid layout: Filter sidebar + Modules -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <!-- Filter Sidebar -->
-      <div class="lg:col-span-1">
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
-          <div class="flex items-center gap-2 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            <h3 class="text-lg font-semibold text-slate-800">Filters</h3>
-          </div>
+        <div class="lg:col-span-1">
+          <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
+            <div class="flex items-center gap-2 mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <h3 class="text-lg font-semibold text-slate-800">Filters</h3>
+            </div>
 
-          <!-- Zoekbalk -->
-          <div class="mb-6">
-            <div class="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="mb-6">
+              <div class="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input 
@@ -311,7 +351,6 @@ const clearFilters = () => {
             </div>
           </div>
           
-          <!-- Locatie filter -->
           <div class="mb-6">
             <h4 class="text-sm font-semibold text-slate-700 mb-3">Locatie</h4>
             <div class="space-y-2">
@@ -332,7 +371,6 @@ const clearFilters = () => {
             </div>
           </div>
 
-          <!-- Studiepunten filter -->
           <div class="mb-6">
             <h4 class="text-sm font-semibold text-slate-700 mb-3">Studiepunten</h4>
             <div class="space-y-2">
@@ -353,7 +391,6 @@ const clearFilters = () => {
             </div>
           </div>
 
-          <!-- Level filter -->
           <div class="mb-6">
             <h4 class="text-sm font-semibold text-slate-700 mb-3">Niveau</h4>
             <div class="space-y-2">
@@ -374,7 +411,6 @@ const clearFilters = () => {
             </div>
           </div>
 
-          <!-- Reset filters knop -->
           <button 
             @click="clearFilters"
             v-if="selectedFilters.locations.length > 0 || selectedFilters.studyCredits.length > 0 || selectedFilters.levels.length > 0"
@@ -388,7 +424,6 @@ const clearFilters = () => {
         </div>
       </div>
 
-      <!-- Modules Content -->
       <div class="lg:col-span-3">
         <div v-if="loading" class="text-center py-16">
           <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4 animate-pulse">
@@ -414,11 +449,9 @@ const clearFilters = () => {
             @click="viewModule(module.id)"
             class="group bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-6 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative"
           >
-            <!-- Gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-br from-red-50/0 to-rose-50/0 group-hover:from-red-50/50 group-hover:to-rose-50/50 transition-all duration-300 rounded-2xl"></div>
             
             <div class="relative z-10">
-              <!-- Header -->
               <div class="flex justify-between items-start mb-4">
                 <div class="flex-1 pr-4">
                   <h3 class="text-xl font-bold text-slate-800 group-hover:text-red-500 transition-colors duration-200 mb-2">{{ module.name }}</h3>
@@ -426,7 +459,6 @@ const clearFilters = () => {
                 </div>
                 
                 <div class="flex items-center gap-3">
-                  <!-- Hartje voor favorieten -->
                   <button 
                     @click="handleToggleFavorite(module.id, $event)"
                     class="p-2 rounded-lg hover:bg-white/50 transition-all duration-200"
@@ -445,7 +477,6 @@ const clearFilters = () => {
                     </svg>
                   </button>
                   
-                  <!-- Dropdown menu -->
                   <div class="relative">
                     <button 
                       @click="toggleMenu(module.id, $event)"
@@ -457,7 +488,6 @@ const clearFilters = () => {
                       </svg>
                     </button>
                     
-                    <!-- Dropdown menu -->
                     <div v-if="showMenus[module.id]" class="absolute right-0 top-12 bg-white border border-slate-200 rounded-xl shadow-lg z-50 min-w-40 overflow-hidden">
                       <button 
                         @click="editModule(module.id, $event)"
@@ -483,7 +513,6 @@ const clearFilters = () => {
                 </div>
               </div>
               
-              <!-- Info badges -->
               <div class="flex flex-wrap gap-2">
                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

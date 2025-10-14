@@ -1,7 +1,10 @@
 import { Module } from '../../core/entities/Module';
 import { ModuleModel } from '../../infrastructure/models/ModuleModel';
 
-// Service voor alle module operaties
+/**
+ * Service voor module operaties
+ * Beheert CRUD operaties voor modules en filter functionaliteit
+ */
 export class ModuleService {
     // Velden die verplicht zijn bij het aanmaken/updaten van modules
     private readonly REQUIRED_FIELDS = [
@@ -14,7 +17,14 @@ export class ModuleService {
         { key: 'learningoutcomes', name: 'Leeruitkomsten' }
     ] as const;
 
-    // Controleer of alle verplichte velden zijn ingevuld
+    /**
+     * Valideert module data (privé methode)
+     * Controleert of alle verplichte velden zijn ingevuld
+     * @private
+     * @param {Partial<Module>} data - Module data om te valideren
+     * @param {boolean} isUpdate - Of dit een update operatie is
+     * @throws {Error} Als validatie faalt
+     */
     private validateModule(data: Partial<Module>, isUpdate = false): void {
         // Valideer string velden
         for (const field of this.REQUIRED_FIELDS) {
@@ -30,7 +40,12 @@ export class ModuleService {
         }
     }
 
-    // Converteer database document naar Module object
+    /**
+     * Converteert database document naar Module object (privé methode)
+     * @private
+     * @param {any} doc - MongoDB document
+     * @returns {Module} Module object
+     */
     private mapToModule(doc: any): Module {
         return {
             id: doc._id.toString(),
@@ -45,7 +60,12 @@ export class ModuleService {
         };
     }
 
-    // Verwijder extra spaties uit alle string velden
+    /**
+     * Verwijdert extra spaties uit alle string velden (privé methode)
+     * @private
+     * @param {any} data - Data object om schoon te maken
+     * @returns {any} Geschoonde data
+     */
     private cleanStringFields(data: any): any {
         const cleanData: any = {};
         Object.keys(data).forEach(key => {
@@ -55,7 +75,12 @@ export class ModuleService {
         return cleanData;
     }
 
-    // Maak nieuwe module aan
+    /**
+     * Creëert een nieuwe module
+     * @param {Module} moduleData - Module data voor creatie
+     * @returns {Promise<Module>} Aangemaakte module
+     * @throws {Error} Als validatie faalt
+     */
     async create(moduleData: Module): Promise<Module> {
         this.validateModule(moduleData);
         const cleanData = this.cleanStringFields(moduleData);
@@ -63,19 +88,32 @@ export class ModuleService {
         return this.mapToModule(module);
     }
 
-    // Haal alle modules op
+    /**
+     * Haalt alle modules op
+     * @returns {Promise<Module[]>} Array van alle modules
+     */
     async getAll(): Promise<Module[]> {
         const modules = await ModuleModel.find();
         return modules.map(module => this.mapToModule(module));
     }
 
-    // Haal één module op op basis van ID
+    /**
+     * Haalt één module op op basis van ID
+     * @param {string} id - Module ID
+     * @returns {Promise<Module | null>} Module object of null als niet gevonden
+     */
     async getById(id: string): Promise<Module | null> {
         const module = await ModuleModel.findById(id);
         return module ? this.mapToModule(module) : null;
     }
 
-    // Update bestaande module
+    /**
+     * Update een bestaande module
+     * @param {string} id - Module ID
+     * @param {Partial<Module>} moduleData - Data om bij te werken
+     * @returns {Promise<Module | null>} Bijgewerkte module of null als niet gevonden
+     * @throws {Error} Als validatie faalt
+     */
     async update(id: string, moduleData: Partial<Module>): Promise<Module | null> {
         this.validateModule(moduleData, true);
         const cleanData = this.cleanStringFields(moduleData);
@@ -83,13 +121,20 @@ export class ModuleService {
         return module ? this.mapToModule(module) : null;
     }
 
-    // Verwijder module
+    /**
+     * Verwijdert een module
+     * @param {string} id - Module ID om te verwijderen
+     * @returns {Promise<boolean>} True als verwijderd, false als niet gevonden
+     */
     async delete(id: string): Promise<boolean> {
         const result = await ModuleModel.findByIdAndDelete(id);
         return Boolean(result);
     }
 
-    // Haal alle unieke filter opties op (voor dropdown menus)
+    /**
+     * Haalt alle unieke filter opties op voor dropdown menus
+     * @returns {Promise<Object>} Object met arrays van filter opties met counts
+     */
     async getFilterOptions() {
         // Functie om te tellen hoeveel modules er zijn per waarde
         const aggregateField = (field: string) => ModuleModel.aggregate([
@@ -111,7 +156,15 @@ export class ModuleService {
         };
     }
 
-    // Haal modules op met filters
+    /**
+     * Haalt modules op met toegepaste filters
+     * @param {Object} filters - Filter object
+     * @param {string[]} [filters.locations] - Array van locaties om op te filteren
+     * @param {number[]} [filters.studyCredits] - Array van studiecredits om op te filteren
+     * @param {string[]} [filters.levels] - Array van niveaus om op te filteren
+     * @param {string} [filters.search] - Zoekterm voor naam
+     * @returns {Promise<Module[]>} Gefilterde array van modules
+     */
     async getFiltered(filters: {locations?: string[], studyCredits?: number[], levels?: string[], search?: string}): Promise<Module[]> {
         const query: any = {};
 

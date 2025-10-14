@@ -1,23 +1,20 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-      <!-- Card -->
       <div class="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
-        <!-- Header -->
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold text-slate-800 mb-2">Account aanmaken</h2>
           <p class="text-slate-600">Maak een account om aan de slag te gaan</p>
         </div>
 
-        <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-6">
           <div class="space-y-1">
             <label class="block text-sm font-medium text-slate-700 mb-2">Naam</label>
             <div class="relative">
-              <input 
-                type="text" 
-                v-model="name" 
-                required 
+              <input
+                type="text"
+                v-model="name"
+                required
                 class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all duration-200 placeholder-slate-400"
                 placeholder="Jouw volledige naam"
               />
@@ -32,10 +29,10 @@
           <div class="space-y-1">
             <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
             <div class="relative">
-              <input 
-                type="email" 
-                v-model="email" 
-                required 
+              <input
+                type="email"
+                v-model="email"
+                required
                 class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all duration-200 placeholder-slate-400"
                 placeholder="je@email.com"
               />
@@ -50,10 +47,10 @@
           <div class="space-y-1">
             <label class="block text-sm font-medium text-slate-700 mb-2">Wachtwoord</label>
             <div class="relative">
-              <input 
-                type="password" 
-                v-model="password" 
-                required 
+              <input
+                type="password"
+                v-model="password"
+                required
                 class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all duration-200 placeholder-slate-400"
                 placeholder="••••••••"
               />
@@ -65,22 +62,21 @@
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             class="w-full bg-gradient-to-r from-red-400 to-rose-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-500 hover:to-rose-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Account aanmaken
           </button>
-          
+
 
         </form>
 
-        <!-- Footer -->
         <div class="mt-8 text-center">
           <p class="text-slate-600">
             Al een account?
-            <router-link 
-              to="/login" 
+            <router-link
+              to="/login"
               class="text-red-500 hover:text-red-600 font-semibold ml-1 transition-colors duration-200"
             >
               Login hier
@@ -108,7 +104,11 @@ const name = ref('');
 const email = ref('');
 const password = ref('');
 
-// Simpele wachtwoord validatie functie
+/**
+ * Valideert een wachtwoord volgens de beveiligingsvereisten
+ * @param {string} pwd - Het wachtwoord om te valideren
+ * @returns {string | null} Null als wachtwoord geldig is, anders foutmelding
+ */
 const validatePassword = (pwd: string) => {
   if (pwd.length < 8) return 'Wachtwoord moet minimaal 8 karakters bevatten';
   if (!/[a-z]/.test(pwd)) return 'Wachtwoord moet een kleine letter bevatten';
@@ -118,7 +118,11 @@ const validatePassword = (pwd: string) => {
   return null;
 };
 
-// Validatie regels (blokkeert submit als niet compleet)
+/**
+ * Valideert het registratie formulier
+ * Controleert email formaat, naam lengte en wachtwoord sterkte
+ * @returns {boolean} True als formulier geldig is, false anders
+ */
 const validateForm = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.value)) {
@@ -140,6 +144,11 @@ const validateForm = () => {
   return true;
 };
 
+/**
+ * Handelt de registratie submit af
+ * Valideert formulier, probeert account aan te maken en navigeert naar home pagina bij succes
+ * Toont foutmeldingen bij validatie of registratie fouten
+ */
 const handleSubmit = async () => {
   try {
     if (!validateForm()) return;

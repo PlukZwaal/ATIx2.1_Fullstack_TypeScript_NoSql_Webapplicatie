@@ -1,9 +1,18 @@
 import { Comment, CreateCommentData } from '../../core/entities/Comment';
 import { CommentModel } from '../../infrastructure/models/CommentModel';
 
-// Service voor alle comment operaties
+/**
+ * Service voor comment operaties
+ * Beheert CRUD operaties voor comments op modules
+ */
 export class CommentService {
-    // Controleer of alle verplichte velden zijn ingevuld
+    /**
+     * Valideert comment data (privé methode)
+     * Controleert of alle verplichte velden zijn ingevuld
+     * @private
+     * @param {CreateCommentData} data - Comment data om te valideren
+     * @throws {Error} Als validatie faalt
+     */
     private validateComment(data: CreateCommentData): void {
         if (!data.moduleId?.trim()) {
             throw new Error('Module ID is verplicht');
@@ -19,7 +28,12 @@ export class CommentService {
         }
     }
 
-    // Converteer database document naar Comment object
+    /**
+     * Converteert database document naar Comment object (privé methode)
+     * @private
+     * @param {any} doc - MongoDB document
+     * @returns {Comment} Comment object
+     */
     private mapToComment(doc: any): Comment {
         return {
             id: doc._id.toString(),
@@ -31,7 +45,12 @@ export class CommentService {
         };
     }
 
-    // Verwijder extra spaties uit alle string velden
+    /**
+     * Verwijdert extra spaties uit alle string velden (privé methode)
+     * @private
+     * @param {any} data - Data object om schoon te maken
+     * @returns {any} Geschoonde data
+     */
     private cleanStringFields(data: any): any {
         const cleanData: any = {};
         Object.keys(data).forEach(key => {
@@ -41,7 +60,12 @@ export class CommentService {
         return cleanData;
     }
 
-    // Maak nieuwe comment aan
+    /**
+     * Creëert een nieuwe comment
+     * @param {CreateCommentData} commentData - Comment data voor creatie
+     * @returns {Promise<Comment>} Aangemaakte comment
+     * @throws {Error} Als validatie faalt
+     */
     async create(commentData: CreateCommentData): Promise<Comment> {
         this.validateComment(commentData);
         const cleanData = this.cleanStringFields(commentData);
@@ -49,13 +73,24 @@ export class CommentService {
         return this.mapToComment(comment);
     }
 
-    // Haal alle comments voor een module op
+    /**
+     * Haalt alle comments voor een specifieke module op
+     * Comments worden gesorteerd op creatiedatum (nieuwste eerst)
+     * @param {string} moduleId - ID van de module
+     * @returns {Promise<Comment[]>} Array van comments voor de module
+     */
     async getByModuleId(moduleId: string): Promise<Comment[]> {
         const comments = await CommentModel.find({ moduleId }).sort({ createdAt: -1 });
         return comments.map(comment => this.mapToComment(comment));
     }
 
-    // Verwijder comment
+    /**
+     * Verwijdert een comment
+     * Alleen de eigenaar van de comment kan deze verwijderen
+     * @param {string} id - Comment ID
+     * @param {string} userId - User ID van de eigenaar
+     * @returns {Promise<boolean>} True als verwijderd, false als niet gevonden of geen toestemming
+     */
     async delete(id: string, userId: string): Promise<boolean> {
         const result = await CommentModel.findOneAndDelete({ _id: id, userId });
         return Boolean(result);

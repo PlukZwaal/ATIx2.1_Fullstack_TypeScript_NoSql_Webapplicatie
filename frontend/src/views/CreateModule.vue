@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen py-8 px-6">
     <div class="container mx-auto max-w-4xl">
-      <!-- Header -->
       <div class="mb-8">
         <div class="flex items-center gap-4 mb-4">
           <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-rose-500 rounded-xl flex items-center justify-center">
@@ -16,10 +15,8 @@
         </div>
       </div>
 
-      <!-- Form Card -->
       <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-xl">
         <form @submit.prevent="handleSubmit" class="space-y-8">
-          <!-- Basis informatie -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -53,7 +50,6 @@
             </div>
           </div>
 
-          <!-- Beschrijving -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -99,7 +95,6 @@
             </div>
           </div>
 
-          <!-- Details -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -134,7 +129,6 @@
             </div>
           </div>
 
-          <!-- Leeruitkomsten -->
           <div class="space-y-6">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -159,7 +153,6 @@
             </div>
           </div>
 
-          <!-- Submit knoppen -->
           <div class="flex flex-col sm:flex-row gap-4 pt-8">
             <button 
               type="submit" 
@@ -185,8 +178,6 @@
               Annuleren
             </router-link>
           </div>
-        
-          <!-- Feedback berichten -->
 
         </form>
       </div>
@@ -218,6 +209,11 @@ const formData = reactive<CreateModuleData>({
 
 // Deze functies zijn niet meer nodig omdat we nu een string gebruiken
 
+/**
+ * Valideert het module creatie formulier
+ * Controleert alle verplichte velden en datatypes
+ * @returns {string | null} Null als formulier geldig is, anders foutmelding
+ */
 const validateForm = (): string | null => {
   if (!formData.name.trim()) return 'Naam is verplicht';
   if (!formData.shortdescription.trim()) return 'Korte beschrijving is verplicht';
@@ -231,6 +227,11 @@ const validateForm = (): string | null => {
   return null;
 };
 
+/**
+ * Handelt de module creatie submit af
+ * Valideert formulier, creëert nieuwe module en navigeert naar modules overzicht bij succes
+ * Toont foutmeldingen bij validatie of creatie fouten
+ */
 const handleSubmit = async () => {
   if (isSubmitting.value) return;
   

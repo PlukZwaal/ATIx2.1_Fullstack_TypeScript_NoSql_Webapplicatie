@@ -17,6 +17,10 @@ const commentsLoading = ref(false);
 const newComment = ref('');
 const submittingComment = ref(false);
 
+/**
+ * Laadt de module details van de server
+ * Haalt module informatie op gebaseerd op de route parameter ID
+ */
 const loadModule = async () => {
   try {
     loading.value = true;
@@ -29,6 +33,10 @@ const loadModule = async () => {
   }
 };
 
+/**
+ * Laadt alle comments voor deze module
+ * Haalt comments op van de server voor de huidige module
+ */
 const loadComments = async () => {
   try {
     commentsLoading.value = true;
@@ -41,6 +49,10 @@ const loadComments = async () => {
   }
 };
 
+/**
+ * Voegt een nieuwe comment toe aan de module
+ * Creëert comment op de server en herlaadt de comments lijst
+ */
 const submitComment = async () => {
   if (!newComment.value.trim()) return;
 
@@ -62,8 +74,9 @@ const submitComment = async () => {
   }
 };
 
-
-
+/**
+ * Navigeert terug naar de modules overzicht pagina
+ */
 const goBack = () => {
   router.push('/modules');
 };
@@ -83,7 +96,6 @@ onMounted(() => {
 <template>
   <div class="min-h-screen py-8 px-6">
     <div class="container mx-auto max-w-5xl">
-      <!-- Loading state -->
       <div v-if="loading" class="text-center py-16">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6 animate-pulse">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,11 +105,8 @@ onMounted(() => {
         <p class="text-slate-600 text-xl">Module wordt geladen...</p>
       </div>
 
-      <!-- Module content -->
       <div v-else-if="module" class="space-y-8">
-        <!-- Header -->
         <div class="relative">
-          <!-- Back button -->
           <button 
             @click="goBack"
             class="mb-6 inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors duration-200 group"
@@ -108,13 +117,11 @@ onMounted(() => {
             Terug naar modules
           </button>
 
-          <!-- Module header -->
           <div class="bg-gradient-to-r from-red-400 to-rose-500 rounded-2xl p-8 text-white relative overflow-hidden">
             <div class="relative z-10">
               <h1 class="text-4xl font-bold mb-4">{{ module.name }}</h1>
               <p class="text-blue-100 text-lg mb-6 max-w-3xl">{{ module.shortdescription }}</p>
               
-              <!-- Quick stats -->
               <div class="flex flex-wrap gap-4">
                 <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,11 +147,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Content sections -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <!-- Main content -->
           <div class="lg:col-span-2 space-y-8">
-            <!-- Beschrijving -->
             <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -157,7 +161,6 @@ onMounted(() => {
               <p class="text-slate-700 leading-relaxed text-lg">{{ module?.description }}</p>
             </div>
 
-            <!-- Inhoud -->
             <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -171,9 +174,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Sidebar -->
           <div class="lg:col-span-1">
-            <!-- Leeruitkomsten -->
             <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8 sticky top-8">
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
@@ -190,7 +191,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Comments sectie -->
         <div class="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
           <div class="flex items-center gap-3 mb-6">
             <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
@@ -201,7 +201,6 @@ onMounted(() => {
             <h2 class="text-2xl font-bold text-slate-800">Comments</h2>
           </div>
 
-          <!-- Nieuwe comment toevoegen -->
           <div v-if="authStore.isAuthenticated" class="mb-6">
             <textarea
               v-model="newComment"
@@ -219,7 +218,6 @@ onMounted(() => {
             </button>
           </div>
 
-          <!-- Login prompt -->
           <div v-else class="mb-6 p-4 bg-slate-50 rounded-xl text-center">
             <p class="text-slate-600 mb-2">Log in om een comment te plaatsen</p>
             <router-link
@@ -230,7 +228,6 @@ onMounted(() => {
             </router-link>
           </div>
 
-          <!-- Comments lijst -->
           <div v-if="commentsLoading" class="text-center py-8">
             <div class="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full animate-pulse">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

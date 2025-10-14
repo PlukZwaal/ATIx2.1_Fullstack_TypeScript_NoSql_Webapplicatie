@@ -50,6 +50,11 @@ import { useToast } from '../composables/useToast'
 
 const { toasts, removeToast } = useToast()
 
+/**
+ * Geeft de CSS classes terug voor de toast achtergrond gebaseerd op type
+ * @param {string} type - Type van de toast ('success', 'error', 'warning', 'info')
+ * @returns {string} CSS classes voor de toast achtergrond
+ */
 const getToastClasses = (type: string) => {
   switch (type) {
     case 'success':
@@ -63,6 +68,11 @@ const getToastClasses = (type: string) => {
   }
 }
 
+/**
+ * Geeft de CSS classes terug voor de icoon achtergrond gebaseerd op type
+ * @param {string} type - Type van de toast ('success', 'error', 'warning', 'info')
+ * @returns {string} CSS classes voor de icoon achtergrond
+ */
 const getIconBackgroundClasses = (type: string) => {
   switch (type) {
     case 'success':
@@ -76,6 +86,11 @@ const getIconBackgroundClasses = (type: string) => {
   }
 }
 
+/**
+ * Geeft de CSS classes terug voor de tekst kleur gebaseerd op type
+ * @param {string} type - Type van de toast ('success', 'error', 'warning', 'info')
+ * @returns {string} CSS classes voor de tekst kleur
+ */
 const getTextClasses = (type: string) => {
   switch (type) {
     case 'success':
@@ -89,6 +104,11 @@ const getTextClasses = (type: string) => {
   }
 }
 
+/**
+ * Geeft de CSS classes terug voor de sluitknop gebaseerd op type
+ * @param {string} type - Type van de toast ('success', 'error', 'warning', 'info')
+ * @returns {string} CSS classes voor de sluitknop
+ */
 const getCloseButtonClasses = (type: string) => {
   switch (type) {
     case 'success':

@@ -3,13 +3,26 @@ import jwt from 'jsonwebtoken';
 import { User, UserLogin, AuthResponse } from '../../core/entities/User';
 import { UserModel } from '../../infrastructure/models/UserModel';
 
-// Service voor authenticatie (registreren en inloggen)
+/**
+ * Service voor gebruikersauthenticatie
+ * Beheert registratie, login en JWT token generatie
+ */
 export class AuthService {
+    /**
+     * Constructor - valideert dat JWT_SECRET beschikbaar is
+     * @throws {Error} Als JWT_SECRET niet is geconfigureerd
+     */
     constructor() {
         if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET ontbreekt');
     }
 
-    // Registreer nieuwe gebruiker
+    /**
+     * Registreert een nieuwe gebruiker
+     * Valideert invoer, controleert of email al bestaat en creëert gebruiker met gehashed wachtwoord
+     * @param {User} userData - Gebruikersgegevens voor registratie
+     * @returns {Promise<AuthResponse>} JWT token en gebruikersinformatie
+     * @throws {Error} Als validatie faalt of email al bestaat
+     */
     async register(userData: User): Promise<AuthResponse> {
         // Valideer naam
         if (!userData.name?.trim() || userData.name.trim().length < 2) {
@@ -53,7 +66,13 @@ export class AuthService {
         };
     }
 
-    // Log gebruiker in
+    /**
+     * Logt een gebruiker in
+     * Valideert credentials en geeft JWT token terug bij succes
+     * @param {UserLogin} credentials - Email en wachtwoord
+     * @returns {Promise<AuthResponse>} JWT token en gebruikersinformatie
+     * @throws {Error} Als credentials ongeldig zijn
+     */
     async login(credentials: UserLogin): Promise<AuthResponse> {
         // Valideer email
         if (!credentials.email.includes('@') || !credentials.email.includes('.')) {
@@ -80,7 +99,13 @@ export class AuthService {
         };
     }
 
-    // Maak JWT token aan (geldig voor 24 uur)
+    /**
+     * Genereert een JWT token voor een gebruiker (privé methode)
+     * Token is 24 uur geldig
+     * @private
+     * @param {User} user - Gebruiker waarvoor token gegenereerd wordt
+     * @returns {string} JWT token
+     */
     private generateToken(user: User): string {
         return jwt.sign({ sub: user.id, name: user.name }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
     }

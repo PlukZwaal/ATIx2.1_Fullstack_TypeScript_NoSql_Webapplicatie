@@ -18,7 +18,6 @@
           </div>
         </div>
 
-        <!-- User info + logout -->
         <div v-if="authStore.isAuthenticated" class="hidden md:flex items-center gap-4">
           <div class="flex items-center gap-3 bg-red-50 rounded-full px-4 py-2">
             <div class="w-8 h-8 bg-gradient-to-r from-red-400 to-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
@@ -43,7 +42,6 @@
         </button>
       </div>
 
-      <!-- Mobile menu -->
       <div
         v-if="authStore.isAuthenticated && menuOpen"
         class="md:hidden border-t border-slate-200 py-4 space-y-2 bg-white/95 backdrop-blur-sm"
@@ -95,16 +93,25 @@ const menuOpen = ref(false);
 
 // Toggle logout & redirect (desktop + mobile gedeeld)
 
+/**
+ * Logt de gebruiker uit en navigeert naar de login pagina
+ */
 const handleLogout = () => {
   authStore.logout();
   router.push('/login');
 };
 
+/**
+ * Logt de gebruiker uit, sluit het mobile menu en navigeert naar login pagina
+ */
 const handleLogoutAndClose = () => {
   handleLogout();
   menuOpen.value = false;
 };
 
+/**
+ * Sluit het mobile menu
+ */
 const closeMenu = () => { menuOpen.value = false; };
 </script>
 

@@ -1,23 +1,20 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-      <!-- Card -->
       <div class="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
-        <!-- Header -->
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold text-slate-800 mb-2">Welkom terug</h2>
           <p class="text-slate-600">Log in om toegang te krijgen tot je modules</p>
         </div>
 
-        <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-6">
           <div class="space-y-1">
             <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
             <div class="relative">
-              <input 
-                type="email" 
-                v-model="email" 
-                required 
+              <input
+                type="email"
+                v-model="email"
+                required
                 class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all duration-200 placeholder-slate-400"
                 placeholder="je@email.com"
               />
@@ -32,10 +29,10 @@
           <div class="space-y-1">
             <label class="block text-sm font-medium text-slate-700 mb-2">Wachtwoord</label>
             <div class="relative">
-              <input 
-                type="password" 
-                v-model="password" 
-                required 
+              <input
+                type="password"
+                v-model="password"
+                required
                 class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all duration-200 placeholder-slate-400"
                 placeholder="••••••••"
               />
@@ -47,22 +44,21 @@
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             class="w-full bg-gradient-to-r from-red-400 to-rose-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-500 hover:to-rose-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Inloggen
           </button>
-          
+
 
         </form>
 
-        <!-- Footer -->
         <div class="mt-8 text-center">
           <p class="text-slate-600">
             Nog geen account?
-            <router-link 
-              to="/register" 
+            <router-link
+              to="/register"
               class="text-red-500 hover:text-red-600 font-semibold ml-1 transition-colors duration-200"
             >
               Registreer hier
@@ -89,7 +85,11 @@ const { error: showError } = useToast();
 const email = ref('');
 const password = ref('');
 
-// Minimale validatie voor login
+/**
+ * Valideert het login formulier
+ * Controleert email formaat en wachtwoord aanwezigheid
+ * @returns {boolean} True als formulier geldig is, false anders
+ */
 const validateForm = () => {
   // Email format check
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -107,6 +107,11 @@ const validateForm = () => {
   return true;
 };
 
+/**
+ * Handelt de login submit af
+ * Valideert formulier, probeert in te loggen en navigeert naar home pagina bij succes
+ * Toont foutmeldingen bij validatie of login fouten
+ */
 const handleSubmit = async () => {
   try {
     if (!validateForm()) return;
