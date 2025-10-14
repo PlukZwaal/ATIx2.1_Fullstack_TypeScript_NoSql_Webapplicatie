@@ -28,7 +28,7 @@ app.use(cors());
 app.use(express.json()); 
 
 // Verbind met MongoDB (niet fataal bij fout zodat health endpoint blijft werken)
-if (HAS_MONGODB_URI) {
+if (HAS_MONGODB_URI) { 
     mongoose
         .connect(process.env.MONGODB_URI as string)
         .then(() => {
