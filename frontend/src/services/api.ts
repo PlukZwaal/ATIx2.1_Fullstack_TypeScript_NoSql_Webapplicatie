@@ -106,9 +106,4 @@ export const getCommentsByModuleId = async (moduleId: string): Promise<Comment[]
   return response.data;
 };
 
-// Verwijder comment
-export const deleteComment = async (id: string): Promise<void> => {
-  await api.delete(`/api/comments/${id}`);
-};
-
 export default api;

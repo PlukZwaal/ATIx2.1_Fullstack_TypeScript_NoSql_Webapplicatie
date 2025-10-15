@@ -83,16 +83,4 @@ export class CommentService {
         const comments = await CommentModel.find({ moduleId }).sort({ createdAt: -1 });
         return comments.map(comment => this.mapToComment(comment));
     }
-
-    /**
-     * Verwijdert een comment
-     * Alleen de eigenaar van de comment kan deze verwijderen
-     * @param {string} id - Comment ID
-     * @param {string} userId - User ID van de eigenaar
-     * @returns {Promise<boolean>} True als verwijderd, false als niet gevonden of geen toestemming
-     */
-    async delete(id: string, userId: string): Promise<boolean> {
-        const result = await CommentModel.findOneAndDelete({ _id: id, userId });
-        return Boolean(result);
-    }
 }

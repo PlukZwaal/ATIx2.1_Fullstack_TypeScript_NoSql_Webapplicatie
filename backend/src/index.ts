@@ -28,7 +28,7 @@ app.use(cors());
 app.use(express.json()); 
 
 // Verbind met MongoDB (niet fataal bij fout zodat health endpoint blijft werken)
-if (HAS_MONGODB_URI) { 
+if (HAS_MONGODB_URI) {
     mongoose
         .connect(process.env.MONGODB_URI as string)
         .then(() => {
@@ -39,7 +39,7 @@ if (HAS_MONGODB_URI) {
             console.error('MongoDB verbindingsfout (server blijft draaien):', err.message);
         });
 } else {
-    console.warn('MONGODB_URI ontbreekt – database functies niet beschikbaar.'); 
+    console.warn('MONGODB_URI ontbreekt - database functies niet beschikbaar.'); 
 }
 
 // Middleware die DB vereist voor bepaalde routes
@@ -76,7 +76,6 @@ app.get('/api/favorites', authMiddleware, requireDb, userController.getFavorites
 // Comment routes (login verplicht)
 app.post('/api/comments', authMiddleware, requireDb, commentController.create);
 app.get('/api/comments/:moduleId', authMiddleware, requireDb, commentController.getByModuleId);
-app.delete('/api/comments/:id', authMiddleware, requireDb, commentController.delete);
 
 // Health endpoint
 app.get('/api/health', (_req, res) => {
