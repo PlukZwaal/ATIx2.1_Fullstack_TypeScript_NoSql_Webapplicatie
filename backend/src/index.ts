@@ -64,7 +64,6 @@ app.get('/api/auth/me', authMiddleware, (req: any, res) => res.json({ id: req.us
 // Module routes (login verplicht via authMiddleware)
 app.post('/api/modules', authMiddleware, requireDb, moduleController.create);
 app.get('/api/modules', authMiddleware, requireDb, moduleController.getAll);
-app.get('/api/modules/filter-options', authMiddleware, requireDb, moduleController.getFilterOptions);
 app.get('/api/modules/:id', authMiddleware, requireDb, moduleController.getById);
 app.put('/api/modules/:id', authMiddleware, requireDb, moduleController.update);
 app.delete('/api/modules/:id', authMiddleware, requireDb, moduleController.delete);

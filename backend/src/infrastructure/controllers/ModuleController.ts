@@ -25,42 +25,16 @@ export class ModuleController {
     };
 
     /**
-     * Haalt alle modules op met optionele filtering
+     * Haalt alle modules op
      * GET /api/modules
-     * @param {Request} req - Express request object met query parameters voor filtering
+     * @param {Request} req - Express request object
      * @param {Response} res - Express response object
      * @returns {Promise<void>} JSON response met array van modules of error
      */
     getAll = async (req: Request, res: Response) => {
         try {
-            const { locations, studyCredits, levels, search } = req.query;
-
-            // Als er filters zijn meegegeven, gebruik dan gefilterde zoekfunctie
-            if (locations || studyCredits || levels || search) {
-                const filters: {locations?: string[], studyCredits?: number[], levels?: string[], search?: string} = {};
-
-                // Voeg zoekopdracht toe als aanwezig
-                if (search) filters.search = search as string;
-
-                // Converteer locations naar array
-                if (locations) filters.locations = Array.isArray(locations) ? locations as string[] : [locations as string];
-
-                // Converteer studyCredits naar array van nummers
-                if (studyCredits) {
-                    const credits = Array.isArray(studyCredits) ? studyCredits : [studyCredits];
-                    filters.studyCredits = credits.map(c => parseInt(c as string)).filter(c => !isNaN(c));
-                }
-
-                // Converteer levels naar array
-                if (levels) filters.levels = Array.isArray(levels) ? levels as string[] : [levels as string];
-
-                const modules = await this.moduleService.getFiltered(filters);
-                res.status(200).json(modules);
-            } else {
-                // Geen filters, haal alle modules op
-                const modules = await this.moduleService.getAll();
-                res.status(200).json(modules);
-            }
+            const modules = await this.moduleService.getAll();
+            res.status(200).json(modules);
         } catch (error) {
             res.status(500).json({ message: error instanceof Error ? error.message : 'Ophalen modules mislukt' });
         }
@@ -97,22 +71,6 @@ export class ModuleController {
             res.status(200).json(result);
         } catch (error) {
             res.status(400).json({ message: error instanceof Error ? error.message : 'Module bijwerken mislukt' });
-        }
-    };
-
-    /**
-     * Haalt alle beschikbare filter opties op voor dropdown menus
-     * GET /api/modules/filters
-     * @param {Request} _req - Express request object (niet gebruikt)
-     * @param {Response} res - Express response object
-     * @returns {Promise<void>} JSON response met filter opties of error
-     */
-    getFilterOptions = async (_req: Request, res: Response) => {
-        try {
-            const filterOptions = await this.moduleService.getFilterOptions();
-            res.status(200).json(filterOptions);
-        } catch (error) {
-            res.status(500).json({ message: error instanceof Error ? error.message : 'Ophalen filter opties mislukt' });
         }
     };
 
