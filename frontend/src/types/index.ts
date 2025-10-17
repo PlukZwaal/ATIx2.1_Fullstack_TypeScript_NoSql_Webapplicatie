@@ -42,13 +42,6 @@ export interface AuthResponse {
   user: User;
 }
 
-// Filter types
-export interface FilterOptions {
-  locations: { value: string; count: number }[];
-  studyCredits: { value: number; count: number }[];
-  levels: { value: string; count: number }[];
-}
-
 // Comment types
 export interface Comment {
   id: string;

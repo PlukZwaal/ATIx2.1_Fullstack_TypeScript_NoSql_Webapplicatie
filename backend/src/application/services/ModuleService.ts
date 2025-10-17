@@ -3,7 +3,7 @@ import { ModuleModel } from '../../infrastructure/models/ModuleModel';
 
 /**
  * Service voor module operaties
- * Beheert CRUD operaties voor modules en filter functionaliteit
+ * Beheert CRUD operaties voor modules
  */
 export class ModuleService {
     // Velden die verplicht zijn bij het aanmaken/updaten van modules
@@ -129,60 +129,5 @@ export class ModuleService {
     async delete(id: string): Promise<boolean> {
         const result = await ModuleModel.findByIdAndDelete(id);
         return Boolean(result);
-    }
-
-    /**
-     * Haalt alle unieke filter opties op voor dropdown menus
-     * @returns {Promise<Object>} Object met arrays van filter opties met counts
-     */
-    async getFilterOptions() {
-        // Functie om te tellen hoeveel modules er zijn per waarde
-        const aggregateField = (field: string) => ModuleModel.aggregate([
-            { $group: { _id: `$${field}`, count: { $sum: 1 } } },
-            { $sort: { _id: 1 } }
-        ]);
-
-        // Haal alle unieke waarden op voor locatie, studiecredits en niveau
-        const [locationCounts, studyCreditCounts, levelCounts] = await Promise.all([
-            aggregateField('location'),
-            aggregateField('studycredit'),
-            aggregateField('level')
-        ]);
-
-        return {
-            locations: locationCounts.map(item => ({ value: item._id, count: item.count })),
-            studyCredits: studyCreditCounts.map(item => ({ value: item._id, count: item.count })),
-            levels: levelCounts.map(item => ({ value: item._id, count: item.count }))
-        };
-    }
-
-    /**
-     * Haalt modules op met toegepaste filters
-     * @param {Object} filters - Filter object
-     * @param {string[]} [filters.locations] - Array van locaties om op te filteren
-     * @param {number[]} [filters.studyCredits] - Array van studiecredits om op te filteren
-     * @param {string[]} [filters.levels] - Array van niveaus om op te filteren
-     * @param {string} [filters.search] - Zoekterm voor naam
-     * @returns {Promise<Module[]>} Gefilterde array van modules
-     */
-    async getFiltered(filters: {locations?: string[], studyCredits?: number[], levels?: string[], search?: string}): Promise<Module[]> {
-        const query: any = {};
-
-        // Zoek op naam als search is ingevuld
-        if (filters.search?.trim()) {
-            query.name = { $regex: filters.search.trim(), $options: 'i' };
-        }
-        
-        // Filter op locaties
-        if (filters.locations?.length) query.location = { $in: filters.locations };
-        
-        // Filter op studiecredits
-        if (filters.studyCredits?.length) query.studycredit = { $in: filters.studyCredits };
-        
-        // Filter op niveau
-        if (filters.levels?.length) query.level = { $in: filters.levels };
-
-        const modules = await ModuleModel.find(query);
-        return modules.map(module => this.mapToModule(module));
     }
 }

@@ -6,7 +6,6 @@ import type {
   Module,
   CreateModuleData,
   UpdateModuleData,
-  FilterOptions,
   Comment,
   CreateCommentData,
   FavoritesResponse,
@@ -42,10 +41,9 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 
 // ==================== MODULES API ====================
 
-// Haal alle modules op (met optionele filters)
-export const getModules = async (params?: URLSearchParams): Promise<Module[]> => {
-  const url = params ? `/api/modules?${params.toString()}` : '/api/modules';
-  const response = await api.get<Module[]>(url);
+// Haal alle modules op
+export const getModules = async (): Promise<Module[]> => {
+  const response = await api.get<Module[]>('/api/modules');
   return response.data;
 };
 
@@ -70,12 +68,6 @@ export const updateModule = async (id: string, data: UpdateModuleData): Promise<
 // Verwijder module
 export const deleteModule = async (id: string): Promise<void> => {
   await api.delete(`/api/modules/${id}`);
-};
-
-// Haal filter opties op
-export const getFilterOptions = async (): Promise<FilterOptions> => {
-  const response = await api.get<FilterOptions>('/api/modules/filter-options');
-  return response.data;
 };
 
 // ==================== FAVORIETEN API ====================
