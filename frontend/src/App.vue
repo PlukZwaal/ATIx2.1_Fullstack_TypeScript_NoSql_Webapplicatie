@@ -9,7 +9,7 @@ const authStore = useAuthStore();
 <template>
   <div class="min-h-screen bg-red-50 flex flex-col">
     <Navbar v-if="authStore.isAuthenticated" />
-    <main :class="authStore.isAuthenticated ? 'flex-1' : 'flex-1'">
+    <main class="flex-1">
       <router-view />
     </main>
     <ToastContainer />
