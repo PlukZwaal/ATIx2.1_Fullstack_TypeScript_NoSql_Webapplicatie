@@ -2,7 +2,7 @@
 
 Moderne fullstack webapplicatie voor het beheren van onderwijsmodules.
 
-## 🚀 Features
+## Features
 
 - **Authenticatie** - JWT-based login/register
 - **CRUD Modules** - Aanmaken, bewerken, verwijderen
@@ -11,12 +11,12 @@ Moderne fullstack webapplicatie voor het beheren van onderwijsmodules.
 - **Comments** - Discussies onder modules
 - **Responsive** - Werkt op alle apparaten
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend:** Vue 3, TypeScript, Pinia, Vue Router, Tailwind CSS, Vite  
 **Backend:** Node.js, Express, TypeScript, MongoDB, Mongoose, JWT
 
-## ⚙️ Setup
+## Setup
 
 ### Vereisten
 - Node.js 20.x
@@ -40,22 +40,17 @@ npm install
 npm run dev
 ```
 
-**URLs:**
-- Frontend: http://localhost:5173
-- Backend: http://localhost:4000
-
-## � Structuur
+## Structuur
 
 ```
 ├── frontend/    # Vue 3 app (components, views, stores)
 └── backend/     # Express API (controllers, services, models)
 ```
 
-## 📝 Gebruik
+## Gebruik
 
 1. Registreer een account
 2. Log in
 3. Bekijk, zoek en maak modules aan
 4. Markeer favorieten en plaats comments
 
-Voor deployment: zie `backend/README_DEPLOY.md`
